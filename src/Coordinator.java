@@ -12,29 +12,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 
-/**
- * The Coordinator is able to handle up to _MAXCLIENTS clients
- * simultaneously.
- *
- * Supported vocabulary:
- * JOIN name - Request to join the group
- * YELL msg - Sends the msg to clients
- * TELL name msg - Sends the msg only the the specified client
- * EXIT - The client gets released by the server
- * @author Tim Norman, University of Southampton
- * @version 2.0
- */
-
 public class Coordinator
 {
-    /** Max # of clients. */
-    final int _MAXCLIENTS = 50;
+    private int port;
+    private int parts;
+    private String[] votingOptions;
+    private int[] participants;
+    private int timeout = 10*1000;
 
-    private Map<Integer,Token> partMap = Collections.synchronizedMap(new HashMap<Integer,Token>(_MAXCLIENTS));
-
-
-    /** Maps name to socket. Key is clientName, value is clientOut. */
-    private Map<Integer,PrintWriter> outcomesRecived = Collections.synchronizedMap(new HashMap<Integer,PrintWriter>(_MAXCLIENTS));
+    private Map<String, PrintWriter> partMap;
+    // Maps name to socket. Key is clientName, value is clientOut. */
+    private Map<String,String> outcomesRecived;
 
     /**
      * For each client we create a thread that handles
@@ -42,40 +30,43 @@ public class Coordinator
      */
     private class ServerThread extends Thread {
         private Socket partSocket;
-        private String _clientName;
-        private BufferedReader br_clientIn;
-        private PrintWriter pw_clientOut;
+        private BufferedReader reader;
+        private PrintWriter writer;
+        private String id;
 
         ServerThread(Socket client) throws IOException {
             partSocket = client;
+            System.out.println("new thread created for mystery participant");
 
             // Open I/O steams
-            br_clientIn = new BufferedReader( new InputStreamReader( client.getInputStream() ) );
-            pw_clientOut = new PrintWriter( new OutputStreamWriter( client.getOutputStream() ) );
+            reader = new BufferedReader( new InputStreamReader( client.getInputStream() ) );
+            writer = new PrintWriter( new OutputStreamWriter( client.getOutputStream() ) );
 
             // Welcome message.
-            pw_clientOut.println( "Welcome to Coordinator\n ");
-            pw_clientOut.flush();
+            writer.println( "You have been connected\n ");
+            writer.flush();
         }
 
         public void run(){
             try {
+                partSocket.setSoTimeout(timeout);
+
                 Token token = null;
                 Tokenizer tokenizer = new Tokenizer();
 
                 // First, the part must send a join
-                token = tokenizer.getToken(br_clientIn.readLine());
+                token = tokenizer.getToken(reader.readLine());
                 if (!(token instanceof JoinToken)) {
+                    System.out.println("First token not a join token");
                     partSocket.close();
                     return;
                 }
 
                 // Adds the ID to the list of parts
-                // ??? Check the part's ID (Should be the port it's listingn on), Check it's not repeated ???
-                if (!(register(_clientName = ((JoinToken)token)._name, pw_clientOut))) {
-                    partSocket.close();
-                    return;
-                }
+                //?? check ports ID - should be the port it's listing on
+                id = ((JoinToken) token).getPportAsString();
+                System.out.println(id + " has been identified");
+                partMap.put(((JoinToken) token).getPportAsString(), writer);
 
                 // If this succeeds, check if all parties have joined
                 checkParticipants();
@@ -83,107 +74,65 @@ public class Coordinator
                 //wait till all send initail data
                 wait();
 
+                //start sending info
+                yell(new DetailsToken(participants).createMessage());
+                yell(new VoteOptionsToken(votingOptions).createMessage());
 
                 // process requests until client exits.
-                token = tokenizer.getToken( br_clientIn.readLine() );
-                while (!(token instanceof ExitToken)) {
-                    if (token instanceof YellToken)
-                        yell(_clientName, ((YellToken)token)._msg);
-                    if (token instanceof TellToken)
-                        tell(_clientName, ((TellToken)token)._rcpt, ((TellToken)token)._msg);
-
-                    if (token instanceof OutcomeToken)
-                        outcomesRecived.put(_clientName, (TellToken)token);
-
-
-                    // Ignore JoinToken
-                    token = tokenizer.getToken(br_clientIn.readLine());
+                token = tokenizer.getToken( reader.readLine() );
+                if (!(token instanceof OutcomeToken)) {
+                    System.out.println("Second token not a outcome token");
+                    partSocket.close();
+                    return;
                 }
 
+                outcomesRecived.put(((OutcomeToken) token).getOutcome(), ((OutcomeToken) token).getPartsAsString());
 
                 partSocket.close();
-                unregister(_clientName);
+                removeParticipant(id);
+                checkOutcome();
             }
             catch (IOException | InterruptedException e) {
                 System.err.println("Caught I/O Exception.");
-                unregister(_clientName);
+                e.printStackTrace();
+                removeParticipant(id);
             }
         }
 
-        public void checkParticipants(){
+        private void removeParticipant(String id){
+            partMap.remove(id);
+            System.out.println(id + " removed");
+        }
+
+        private void checkParticipants(){
             //if all parties have joined, send details and vote options
             if (partMap.size() == parts){
-                yell(_clientName, ((YellToken)token)._msg);
+                notifyAll();
             }
+        }
 
-            //all will start
-            notifyAll();
+    }
+
+    private synchronized void checkOutcome(){
+        //if all parties have joined, send details and vote options
+        if (outcomesRecived.size() == parts){
+            System.out.println("all outcomes recived");
         }
     }
 
-
-    /**
-     * Attempts to register the client under the specified name.
-     * Return true if successful.
-     */
-    boolean register(Integer port, PrintWriter out)
+    // Send a message to all registered clients.
+    private synchronized void yell(String msg)
     {
-        // if (_numOfClients >= _MAXCLIENTS)
-        //     return false;
-
-        // if (partMap.containsKey(name)) {
-        //     System.err.println("Coordinator: Name already joined.");
-        //     return false;
-        // }
-
-        try {
-            partMap.put(port, out);
-        }
-        catch (NullPointerException e) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Unregisters the client with the specified name.
-     */
-    void unregister(String name)
-    {
-        partMap.remove(name);
-        _numOfClients--;
-        yell("Coordinator", name+" has exited.");
-    }
-
-    /**
-     * Send a message to all registered clients.
-     */
-    synchronized void yell(String sender, String msg)
-    {
-        String txt = sender + ": " + msg;
         Iterator iter = partMap.values().iterator();
         while (iter.hasNext()) {
             PrintWriter pw = (PrintWriter)iter.next();
-            pw.println(txt);
+            pw.println(msg);
             pw.flush();
         }
     }
 
-    /**
-     * Send a message to the specified recipient.
-     */
-    synchronized void tell(String sender, String rcpt, String msg)
-    {
-        String txt = sender + ": " + msg;
-        PrintWriter pw = partMap.get(rcpt);
-        if (pw == null)
-            return; // No client with the specified name
-        pw.println(txt);
-        pw.flush();
-    }
-
     // Wait for a connection request.
-    void startListening(int port, int parts) throws IOException{
+    private void startListening() throws IOException{
         int joinedCnt = 0;
         ServerSocket listener = new ServerSocket(port);
         System.out.println("Listning...");
@@ -199,7 +148,7 @@ public class Coordinator
         System.out.println("Stopped listning.");
     }
 
-    void init(String[] args) throws IOException {
+    private void init(String[] args) throws IOException {
         //extraction of options
         port = Integer.parseInt(args[0]);
         parts = Integer.parseInt(args[1]);
@@ -209,15 +158,16 @@ public class Coordinator
         //confirm for user
         System.out.println("Coordinator started - Port: " + port);
         System.out.println("Expecting participant count: " + parts);
+        System.out.println("Voting options: " + Arrays.toString(votingOptions));
+        System.out.println("Expecting participant: " + Arrays.toString(participants));
 
-        //start listing
-        startListening(port, parts);
+        partMap = Collections.synchronizedMap(new HashMap<String, PrintWriter>(parts));
+        outcomesRecived = Collections.synchronizedMap(new HashMap<String, String>(parts));
+
+        startListening();
     }
 
-    private int port;
-    private int parts;
-    private String[] votingOptions;
-    private int[] participants;
+
     public static void main(String[] args) throws IOException {
 
         System.out.println("Server started on <port>");
