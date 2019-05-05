@@ -217,7 +217,7 @@ public class Coordinator
     public static void main(String[] args) throws IOException {
         Coordinator coord =  new Coordinator();
         //coord.init(args);
-        coord.init(new String[]{"1444", "3", "A", "B"});
+        coord.init(new String[]{"1444", "2", "A", "B"});
 
     }
 }

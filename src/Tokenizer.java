@@ -188,7 +188,7 @@ private String[][] votes;
     VoteToken(String[] votes) {
         tokenType = TokenType.VOTE;
 
-        String[][] orderedVotes = new String[votes.length/2][2];
+        String[][] orderedVotes = new String[votes.length/2+1][2];
         for (int i = 0; i < votes.length; i+=2){
             orderedVotes[i][0] = votes[i];
             orderedVotes[i+1][1] = votes[i+1];
