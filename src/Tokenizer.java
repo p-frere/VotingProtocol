@@ -178,22 +178,32 @@ class VoteOptionsToken extends Token {
 
 //-----------vote
 class VoteToken extends Token {
-private String[][] votes;
+    private String[][] votes;
+    private String voteAsSting;
 
     VoteToken(String[][] votes) {
-    tokenType = TokenType.VOTE;
-    this.votes = votes;
+        tokenType = TokenType.VOTE;
+        this.votes = votes;
+    }
+
+    VoteToken(String votes) {
+        tokenType = TokenType.VOTE;
+        this.voteAsSting = votes;
+        this.votes = makeArray(votes.split(" "));
     }
 
     VoteToken(String[] votes) {
         tokenType = TokenType.VOTE;
+        this.votes = makeArray(votes);
+    }
 
+    private String[][] makeArray(String votes[]){
         String[][] orderedVotes = new String[votes.length/2+1][2];
         for (int i = 0; i < votes.length; i+=2){
             orderedVotes[i][0] = votes[i];
             orderedVotes[i+1][1] = votes[i+1];
         }
-        this.votes = orderedVotes;
+        return orderedVotes;
     }
 
 
@@ -202,6 +212,10 @@ private String[][] votes;
     }
 
     public String getVotesAsString(){
+        if (!voteAsSting.equals(null)){
+            return voteAsSting;
+        }
+
         StringBuilder sb = new StringBuilder();
         for (String[] vote : votes){
             sb.append(vote[0]);

@@ -3,17 +3,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ParticipantListner extends Thread {
-    Participant participant;
-    int[] otherParts;
+    PartCoord partCoord;
     int pport;
-    int parts;
+    int initPartCnt;
 
     //Constructor
-    public ParticipantListner(Participant participant, int[] otherParts, int pport) {
-        this.participant = participant;
-        this.otherParts = otherParts;
+    public ParticipantListner(PartCoord partCoord, int pport, int initPartCnt) {
+        this.partCoord = partCoord;
         this.pport = pport;
-        parts = otherParts.length;
+        this.initPartCnt = initPartCnt;
     }
 
     @Override
@@ -23,16 +21,17 @@ public class ParticipantListner extends Thread {
         ServerSocket listener = null;
         try {
             listener = new ServerSocket(pport);
-
             System.out.println(pport + " Part listner started");
 
-            while (joinedCnt <= parts) {
+            //accept new connections, create a new thread for them
+            while (joinedCnt <= initPartCnt) {
                 Socket client = listener.accept();
-                new ParticipantConnsOUT(client, otherParts).start();
+                new ParticipantConnsOUT(client, partCoord).start();
                 joinedCnt++;
-                System.out.println("connected to part " + joinedCnt + "/" + parts);
+                System.out.println("connected to part " + joinedCnt + "/" + initPartCnt);
             }
 
+            //close when expected number of connections
             listener.close();
             System.out.println("Stopped part listning.");
 

@@ -1,4 +1,0 @@
-
-class ParticipantConnsIN extends Thread {
-
-}
