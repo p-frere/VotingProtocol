@@ -19,10 +19,7 @@ public class Coordinator
     // Maps name to socket. Key is clientName, value is clientOut. */
     private Map<String,String> outcomesRecived;
 
-    /**
-     * For each client we create a thread that handles
-     * all i/o with that client.
-     */
+    //A Thread manages I/O with each participant
     private class ServerThread extends Thread {
         private Socket partSocket;
         private BufferedReader reader;
@@ -31,34 +28,23 @@ public class Coordinator
 
         ServerThread(Socket client) throws IOException {
             partSocket = client;
-            System.out.println("new thread created for mystery participant");
         }
 
         public void run(){
             try {
-                System.out.println("starting IO");
-
-
                 // Open I/O steams
                 reader = new BufferedReader( new InputStreamReader( partSocket.getInputStream() ) );
                 writer = new PrintWriter( new OutputStreamWriter( partSocket.getOutputStream() ) );
 
-//                // Welcome message.
-//                writer.println( "You have been connected\n ");
-//                writer.flush();
 
                 //partSocket.setSoTimeout(timeout);
 
+                // First, the participant must send a join token
                 Token token = null;
-
                 Tokenizer tokenizer = new Tokenizer();
-                System.out.println("reading...");
-                // First, the part must send a join
 
-
-                String temp = temp = reader.readLine();
+                String temp = reader.readLine();
                 token = tokenizer.getToken(temp);
-
                 if (!(token instanceof JoinToken)) {
                     System.out.println("First token not a join token");
                     partSocket.close();
@@ -71,13 +57,16 @@ public class Coordinator
                 System.out.println(id + " has been identified");
                 partMap.put(((JoinToken) token).getPportAsString(), writer);
 
-               sendVoteInfomation();
+                //wait for all participants to join
+                waitForJoins();
+
+
                 //start sending info
                 tell(id, new DetailsToken(getParts(id)).createMessage());
-                yell(new VoteOptionsToken(votingOptions).createMessage());
+                tell(id, new VoteOptionsToken(votingOptions).createMessage());
 
 
-                // process requests until client exits.
+                // wait until votes received from participants exits.
                 token = tokenizer.getToken( reader.readLine() );
                 if (!(token instanceof OutcomeToken)) {
                     System.out.println("Second token not a outcome token");
@@ -87,6 +76,7 @@ public class Coordinator
 
                 outcomesRecived.put(id, ((OutcomeToken) token).getOutcome() + " - " + ((OutcomeToken) token).getPartsAsString());
 
+                //closes channels of communication
                 partSocket.close();
                 removeParticipant(id);
                 checkOutcome();
@@ -98,11 +88,13 @@ public class Coordinator
             }
         }
 
+        //remove a participant for the list
         private void removeParticipant(String id){
             partMap.remove(id);
             System.out.println(id + " removed");
         }
 
+        //get a String[] of all the participants excluding current self
         private String[] getParts(String id){
             Iterator<String> it = partMap.keySet().iterator();
             String current;
@@ -120,15 +112,16 @@ public class Coordinator
 
     }
 
+    //if all parties have joined, send details and vote options
     private synchronized void checkOutcome(){
-        //if all parties have joined, send details and vote options
         if (outcomesRecived.size() == parts){
             System.out.println("all outcomes recived");
             printOutcome();
         }
     }
 
-    private synchronized void sendVoteInfomation(){
+    //wait for all parties to join
+    private synchronized void waitForJoins(){
         if (partMap.size() != parts) {
 
             while (partMap.size() != parts) {
@@ -148,7 +141,7 @@ public class Coordinator
 
     }
 
-
+    //print outcome
     private synchronized void printOutcome(){
         for (String id: outcomesRecived.keySet()) {
             System.out.println();
@@ -167,9 +160,8 @@ public class Coordinator
         }
     }
 
-    /**
-     * Send a message to the specified recipient.
-     */
+
+    //Send a message to the specified recipient.
     synchronized void tell(String id, String msg)
     {
         PrintWriter pw = partMap.get(id);
@@ -217,7 +209,7 @@ public class Coordinator
     public static void main(String[] args) throws IOException {
         Coordinator coord =  new Coordinator();
         //coord.init(args);
-        coord.init(new String[]{"1444", "2", "A", "B"});
+        coord.init(new String[]{"1444", "3", "A", "B"});
 
     }
 }

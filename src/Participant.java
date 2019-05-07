@@ -90,47 +90,16 @@ public class Participant {
         partCoord.startStreams();
         partCoord.broadcastVote();
 
-        //wait till done and connected
-        //send a vote
-//        try {
-//            Socket socket2 = new Socket("127.0.0.1", parts[0]);
-//            System.out.println("socket2 connected to OTHER PARTICIPANT");
-//
-//            PrintWriter writer2 = new PrintWriter(socket2.getOutputStream());
-//
-//            writer2.println(new VoteToken(new String[][]{{String.valueOf(pport), vote}}).createMessage());
-//            writer2.flush();
-//
-//            wait();
-//
-//
-//
-//
-//        } catch (IOException e) {
-//            System.out.println("socket delceration errorto OTHER PARTICIPANT");
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//
-//        //returns outcome to coordinator
-//        System.out.println("Sending outcome...");
-//        writer.write(new OutcomeToken(vote, new DetailsToken(parts).getDetailsAsStringArray()).createMessage());
-//        writer.flush( );
-
-        //wait
-
+        //Does nothing until voting finished is called
         System.out.println("PART: waiting...");
     }
 
-
+    //steps called when voting finished
     public synchronized void votingFinished(String finalVotes){
         System.out.println("PART: Final votes -> " + finalVotes);
 
-        String[] tookPart = new String[finalVotes.length()/2];
         String items[] = finalVotes.split(" ");
+        String[] tookPart = new String[items.length/2];
         Map<String, Integer> voteCount = new HashMap<>();
         for (int i = 0; i < items.length; i++){
             if (i%2 == 0){
@@ -146,20 +115,21 @@ public class Participant {
         String jointVote = null;
         int max = 0;
         for (String vote : voteCount.keySet()){
+            System.out.println("_________ vote" + vote + " coutn " + voteCount.get(vote));
             if (voteCount.get(vote) > max){
                 max = voteCount.get(vote);
                 jointVote = vote;
-            }
-
-            if (voteCount.get(vote) == max){
+            } else if (voteCount.get(vote) == max){
                 jointVote = null;
+            } else {
+
             }
         }
         System.out.println("PART: outcome = " + jointVote);
 
         //returns outcome to coordinator
         System.out.println("PART: Sending outcome...");
-        writer.println((new OutcomeToken(jointVote, tookPart)));
+        writer.println((new OutcomeToken(jointVote, tookPart)).createMessage());
         writer.flush( );
 
         System.out.println("PART: closing...");

@@ -6,7 +6,8 @@ enum TokenType
     DETAILS,
     VOTE_OPTIONS,
     OUTCOME,
-    VOTE
+    VOTE,
+    RESTART
 
 //    JOIN int,
 //    DETAILS [int],
@@ -37,6 +38,8 @@ class Tokenizer {
                 return new VoteToken(Arrays.copyOfRange(words, 1, words.length));
             case "DETAILS":
                 return new DetailsToken(Arrays.copyOfRange(words, 1, words.length));
+            case "RESTART":
+                return new RestartToken();
             default:
                 System.out.println("TOK: corrupt token received");
                 return null;
@@ -74,6 +77,16 @@ class JoinToken extends Token {
 
     public String createMessage(){
         return  (tokenType.toString() + " " + getPportAsString());
+    }
+}
+
+
+class RestartToken extends Token {
+    RestartToken() {
+        tokenType = TokenType.RESTART;
+    }
+    public String createMessage(){
+        return  (tokenType.toString());
     }
 }
 
@@ -200,7 +213,6 @@ class VoteToken extends Token {
     }
 
     private String[][] makeArray(String votes[]){
-        System.out.println(Arrays.toString(votes));
         String[][] orderedVotes = new String[votes.length/2][2];
         for (int i = 0; i < votes.length; i+=2){
             orderedVotes[i/2][0] = votes[i];

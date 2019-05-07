@@ -14,6 +14,7 @@ class PartCoord extends Thread {
     private String currentVote;
     private int pport;
     private String thisVote;
+    private int errorCode = 1;
 
 
 
@@ -162,9 +163,16 @@ class PartCoord extends Thread {
     public void broadcastVote(){
         System.out.println("CORD: broadcasting votes...");
         //sends votes collected to all participants
+        int count = 0;
         for (PrintWriter pw : writers.values()){
-            pw.println(new VoteToken(currentVote).createMessage());
-            pw.flush();
+//            if ((count >= 1) && (errorCode == 1)){
+//                pw.close();
+//                return;
+//            } else {
+                pw.println(new VoteToken(currentVote).createMessage());
+                pw.flush();
+                count++;
+//            }
         }
     }
 

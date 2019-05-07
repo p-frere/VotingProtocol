@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bfd8a11c-bcc5-40f4-aee8-46834ac71669" name="Default Changelist" comment="added coord class for participants">
+    <list default="true" id="bfd8a11c-bcc5-40f4-aee8-46834ac71669" name="Default Changelist" comment="voting between participants added">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/votingProtocol/Participant.class" afterPath="$PROJECT_DIR$/out/production/votingProtocol/Participant.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/votingProtocol/Tokenizer.class" afterPath="$PROJECT_DIR$/out/production/votingProtocol/Tokenizer.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/votingProtocol/VoteToken.class" afterPath="$PROJECT_DIR$/out/production/votingProtocol/VoteToken.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Coordinator.java" afterPath="$PROJECT_DIR$/src/Coordinator.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PartCoord.java" afterPath="$PROJECT_DIR$/src/PartCoord.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Participant.java" afterPath="$PROJECT_DIR$/src/Participant.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/ParticipantConnsOUT.java" afterPath="$PROJECT_DIR$/src/ParticipantConnsOUT.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/ParticipantListner.java" afterPath="$PROJECT_DIR$/src/ParticipantListner.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Tokenizer.java" afterPath="$PROJECT_DIR$/src/Tokenizer.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -23,8 +25,8 @@
       <file leaf-file-name="Coordinator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Coordinator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="407">
-              <caret line="130" column="36" lean-forward="false" selection-start-line="130" selection-start-column="36" selection-end-line="130" selection-end-column="36" />
+            <state relative-caret-position="541">
+              <caret line="201" column="32" lean-forward="true" selection-start-line="201" selection-start-column="32" selection-end-line="201" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -33,11 +35,10 @@
       <file leaf-file-name="Participant.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Participant.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="816">
-              <caret line="157" column="57" lean-forward="false" selection-start-line="157" selection-start-column="57" selection-end-line="157" selection-end-column="57" />
+            <state relative-caret-position="1830">
+              <caret line="113" column="0" lean-forward="false" selection-start-line="113" selection-start-column="0" selection-end-line="113" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <marker date="1557248044360" expanded="true" signature="3961:4103" ph="..." />
               </folding>
             </state>
           </provider>
@@ -46,8 +47,8 @@
       <file leaf-file-name="PartCoord.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PartCoord.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="558">
-              <caret line="130" column="41" lean-forward="false" selection-start-line="130" selection-start-column="41" selection-end-line="130" selection-end-column="41" />
+            <state relative-caret-position="-872">
+              <caret line="69" column="35" lean-forward="false" selection-start-line="69" selection-start-column="16" selection-end-line="69" selection-end-column="35" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -58,9 +59,16 @@
       <file leaf-file-name="Tokenizer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Tokenizer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1856">
-              <caret line="192" column="0" lean-forward="false" selection-start-line="192" selection-start-column="0" selection-end-line="192" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="544">
+              <caret line="83" column="34" lean-forward="false" selection-start-line="83" selection-start-column="34" selection-end-line="83" selection-end-column="34" />
+              <folding>
+                <element signature="e#1914#1915#0" expanded="true" />
+                <element signature="e#1959#1960#0" expanded="true" />
+                <element signature="e#1994#1995#0" expanded="true" />
+                <element signature="e#2040#2041#0" expanded="true" />
+                <element signature="e#4413#4414#0" expanded="true" />
+                <element signature="e#4489#4490#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -68,8 +76,8 @@
       <file leaf-file-name="ParticipantConnsOUT.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/ParticipantConnsOUT.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="672">
-              <caret line="42" column="62" lean-forward="false" selection-start-line="42" selection-start-column="62" selection-end-line="42" selection-end-column="62" />
+            <state relative-caret-position="768">
+              <caret line="48" column="18" lean-forward="true" selection-start-line="48" selection-start-column="18" selection-end-line="48" selection-end-column="18" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -101,6 +109,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>yell</find>
+      <find>System.out.println(</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -114,14 +123,14 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Coordinator.java" />
         <option value="$PROJECT_DIR$/src/ParticipantConnection.java" />
         <option value="$PROJECT_DIR$/src/ParticipantConnsIN.java" />
         <option value="$PROJECT_DIR$/src/ParticipantListner.java" />
         <option value="$PROJECT_DIR$/src/ParticipantConnsOUT.java" />
-        <option value="$PROJECT_DIR$/src/Tokenizer.java" />
-        <option value="$PROJECT_DIR$/src/PartCoord.java" />
         <option value="$PROJECT_DIR$/src/Participant.java" />
+        <option value="$PROJECT_DIR$/src/PartCoord.java" />
+        <option value="$PROJECT_DIR$/src/Tokenizer.java" />
+        <option value="$PROJECT_DIR$/src/Coordinator.java" />
       </list>
     </option>
   </component>
@@ -138,9 +147,9 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-7" />
-    <option name="width" value="1294" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="868" />
+    <option name="width" value="1699" />
     <option name="height" value="1407" />
   </component>
   <component name="ProjectView">
@@ -343,7 +352,7 @@
       <workItem from="1556869704292" duration="285000" />
       <workItem from="1556870011188" duration="23312000" />
       <workItem from="1557158468812" duration="12394000" />
-      <workItem from="1557224461732" duration="12085000" />
+      <workItem from="1557224461732" duration="16185000" />
     </task>
     <task id="LOCAL-00001" summary="started participant communication">
       <created>1557083491797</created>
@@ -359,11 +368,18 @@
       <option name="project" value="LOCAL" />
       <updated>1557179041152</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="voting between participants added">
+      <created>1557248181006</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1557248181006</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="47835000" />
+    <option name="totallyTimeSpent" value="51935000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -375,7 +391,8 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="2576" height="1416" extended-state="6" />
+    <frame x="868" y="0" width="1699" height="1407" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296617" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -385,12 +402,12 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31279808" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.109375" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26967663" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.11014949" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296617" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32946917" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -442,7 +459,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="started participant communication" />
     <MESSAGE value="added coord class for participants" />
-    <option name="LAST_COMMIT_MESSAGE" value="added coord class for participants" />
+    <MESSAGE value="voting between participants added" />
+    <option name="LAST_COMMIT_MESSAGE" value="voting between participants added" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -463,7 +481,6 @@
           <caret line="90" column="33" lean-forward="true" selection-start-line="90" selection-start-column="33" selection-end-line="90" selection-end-column="33" />
           <folding>
             <element signature="imports" expanded="true" />
-            <marker date="1557248044360" expanded="true" signature="3961:4103" ph="..." />
           </folding>
         </state>
       </provider>
@@ -472,7 +489,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2960">
           <caret line="205" column="28" lean-forward="false" selection-start-line="205" selection-start-column="28" selection-end-line="205" selection-end-column="28" />
-          <folding />
+          <folding>
+            <element signature="e#1914#1915#0" expanded="true" />
+            <element signature="e#1959#1960#0" expanded="true" />
+            <element signature="e#1994#1995#0" expanded="true" />
+            <element signature="e#2040#2041#0" expanded="true" />
+            <element signature="e#4413#4414#0" expanded="true" />
+            <element signature="e#4489#4490#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -518,7 +542,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3040">
           <caret line="190" column="61" lean-forward="false" selection-start-line="190" selection-start-column="61" selection-end-line="190" selection-end-column="61" />
-          <folding />
+          <folding>
+            <element signature="e#1914#1915#0" expanded="true" />
+            <element signature="e#1959#1960#0" expanded="true" />
+            <element signature="e#1994#1995#0" expanded="true" />
+            <element signature="e#2040#2041#0" expanded="true" />
+            <element signature="e#4413#4414#0" expanded="true" />
+            <element signature="e#4489#4490#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -548,7 +579,6 @@
           <caret line="84" column="0" lean-forward="false" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <marker date="1557248044360" expanded="true" signature="3961:4103" ph="..." />
           </folding>
         </state>
       </provider>
@@ -603,8 +633,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/ParticipantConnsOUT.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="42" column="62" lean-forward="false" selection-start-line="42" selection-start-column="62" selection-end-line="42" selection-end-column="62" />
+        <state relative-caret-position="768">
+          <caret line="48" column="18" lean-forward="true" selection-start-line="48" selection-start-column="18" selection-end-line="48" selection-end-column="18" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Participant.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1830">
+          <caret line="113" column="0" lean-forward="false" selection-start-line="113" selection-start-column="0" selection-end-line="113" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -613,8 +653,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/PartCoord.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="558">
-          <caret line="130" column="41" lean-forward="false" selection-start-line="130" selection-start-column="41" selection-end-line="130" selection-end-column="41" />
+        <state relative-caret-position="-872">
+          <caret line="69" column="35" lean-forward="false" selection-start-line="69" selection-start-column="16" selection-end-line="69" selection-end-column="35" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -623,27 +663,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Tokenizer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1856">
-          <caret line="192" column="0" lean-forward="false" selection-start-line="192" selection-start-column="0" selection-end-line="192" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Participant.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="157" column="57" lean-forward="false" selection-start-line="157" selection-start-column="57" selection-end-line="157" selection-end-column="57" />
+        <state relative-caret-position="544">
+          <caret line="83" column="34" lean-forward="false" selection-start-line="83" selection-start-column="34" selection-end-line="83" selection-end-column="34" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <marker date="1557248044360" expanded="true" signature="3961:4103" ph="..." />
+            <element signature="e#1914#1915#0" expanded="true" />
+            <element signature="e#1959#1960#0" expanded="true" />
+            <element signature="e#1994#1995#0" expanded="true" />
+            <element signature="e#2040#2041#0" expanded="true" />
+            <element signature="e#4413#4414#0" expanded="true" />
+            <element signature="e#4489#4490#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Coordinator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="407">
-          <caret line="130" column="36" lean-forward="false" selection-start-line="130" selection-start-column="36" selection-end-line="130" selection-end-column="36" />
+        <state relative-caret-position="541">
+          <caret line="201" column="32" lean-forward="true" selection-start-line="201" selection-start-column="32" selection-end-line="201" selection-end-column="32" />
           <folding />
         </state>
       </provider>
