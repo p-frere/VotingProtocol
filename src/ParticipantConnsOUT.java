@@ -14,7 +14,7 @@ class ParticipantConnsOUT extends Thread {
 
     public ParticipantConnsOUT(Socket partSocket, PartCoord partCoord){
         this.partSocket = partSocket;
-        System.out.println("new thread created for voting");
+        System.out.println("CONS: new thread created for voting");
         this.partCoord = partCoord;
     }
 
@@ -30,14 +30,18 @@ class ParticipantConnsOUT extends Thread {
 
             Token token = null;
             Tokenizer tokenizer = new Tokenizer();
-            System.out.println("reading from connected parts...");
+            System.out.println("CONS: reading from connected parts...");
 
-            String temp = reader.readLine();
-            token = tokenizer.getToken(temp);
+            String temp = null;
+            while ((temp = reader.readLine()) != null) {
+                token = tokenizer.getToken(temp);
 
-            if (token instanceof VoteToken) {
-                //send voter id (first id in list) and votes to the participant coordinator
-                partCoord.addVote(((VoteToken) token).getVotes()[0][0],((VoteToken) token).getVotesAsString());
+                if (token instanceof VoteToken) {
+                    //send voter id (first id in list) and votes to the participant coordinator
+                    partCoord.addVote(((VoteToken) token).getVotes()[0][0], ((VoteToken) token).getVotesAsString());
+                } else {
+                    System.out.println("CONS: not a vote token");
+                }
             }
 
         } catch (IOException e) {

@@ -21,19 +21,19 @@ public class ParticipantListner extends Thread {
         ServerSocket listener = null;
         try {
             listener = new ServerSocket(pport);
-            System.out.println(pport + " Part listner started");
+            System.out.println("LIS: " + pport + " Part listner started");
 
             //accept new connections, create a new thread for them
             while (joinedCnt <= initPartCnt) {
                 Socket client = listener.accept();
                 new ParticipantConnsOUT(client, partCoord).start();
                 joinedCnt++;
-                System.out.println("connected to part " + joinedCnt + "/" + initPartCnt);
+                System.out.println("LIS: connected to part " + joinedCnt + "/" + initPartCnt);
             }
 
             //close when expected number of connections
             listener.close();
-            System.out.println("Stopped part listning.");
+            System.out.println("LIS: Stopped part listning.");
 
         } catch (IOException e) {
             e.printStackTrace();

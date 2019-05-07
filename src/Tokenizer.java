@@ -22,7 +22,7 @@ enum TokenType
 class Tokenizer {
 
     public Token getToken(String string) {
-        System.out.println("recived: " + string);
+        System.out.println("TOK: recived: " + string);
         String[] words = string.split(" ");
 
         switch (words[0]) {
@@ -38,7 +38,7 @@ class Tokenizer {
             case "DETAILS":
                 return new DetailsToken(Arrays.copyOfRange(words, 1, words.length));
             default:
-                System.out.println("corrupt token received");
+                System.out.println("TOK: corrupt token received");
                 return null;
         }
     }
@@ -184,6 +184,7 @@ class VoteToken extends Token {
     VoteToken(String[][] votes) {
         tokenType = TokenType.VOTE;
         this.votes = votes;
+        voteAsSting = null;
     }
 
     VoteToken(String votes) {
@@ -195,13 +196,15 @@ class VoteToken extends Token {
     VoteToken(String[] votes) {
         tokenType = TokenType.VOTE;
         this.votes = makeArray(votes);
+        voteAsSting = null;
     }
 
     private String[][] makeArray(String votes[]){
-        String[][] orderedVotes = new String[votes.length/2+1][2];
+        System.out.println(Arrays.toString(votes));
+        String[][] orderedVotes = new String[votes.length/2][2];
         for (int i = 0; i < votes.length; i+=2){
-            orderedVotes[i][0] = votes[i];
-            orderedVotes[i+1][1] = votes[i+1];
+            orderedVotes[i/2][0] = votes[i];
+            orderedVotes[i/2][1] = votes[i+1];
         }
         return orderedVotes;
     }
@@ -212,7 +215,7 @@ class VoteToken extends Token {
     }
 
     public String getVotesAsString(){
-        if (!voteAsSting.equals(null)){
+        if (voteAsSting != null){
             return voteAsSting;
         }
 
