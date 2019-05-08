@@ -1,21 +1,19 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 class ParticipantConnsOUT extends Thread {
 
     BufferedReader reader;
     PrintWriter writer;
     Socket partSocket;
-    PartCoord partCoord;
+    BlockingQueue<VoteToken> votesRecived;
 
 
-    public ParticipantConnsOUT(Socket partSocket, PartCoord partCoord){
+    public ParticipantConnsOUT(Socket partSocket, BlockingQueue<VoteToken> votesRecived){
         this.partSocket = partSocket;
         System.out.println("CONS: new thread created for voting");
-        this.partCoord = partCoord;
+        this.votesRecived = votesRecived;
     }
 
 
@@ -38,7 +36,8 @@ class ParticipantConnsOUT extends Thread {
 
                 if (token instanceof VoteToken) {
                     //send voter id (first id in list) and votes to the participant coordinator
-                    partCoord.addVote(((VoteToken) token).getVotes()[0][0], ((VoteToken) token).getVotesAsString());
+                    //partCoord.addVote(((VoteToken) token).getVotes()[0][0], ((VoteToken) token).getVotesAsString());
+                    votesRecived.add((VoteToken)token);
                 } else {
                     System.out.println("CONS: not a vote token");
                 }
@@ -46,7 +45,7 @@ class ParticipantConnsOUT extends Thread {
 
         } catch (IOException e) {
             //if connection dies, send alert
-            partCoord.removeParticipant();
+            //TODO what to do here
             e.printStackTrace();
         }
 

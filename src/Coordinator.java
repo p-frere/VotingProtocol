@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Coordinator
 {
@@ -14,10 +16,19 @@ public class Coordinator
     private int parts;
     private String[] votingOptions;
     private int timeout = 10*1000;
+    boolean finished;
 
     private Map<String, PrintWriter> partMap;
     // Maps name to socket. Key is clientName, value is clientOut. */
-    private Map<String,String> outcomesRecived;
+    private BlockingQueue<OutcomeToken> outcomesRecived;
+
+    public synchronized boolean isFinished() {
+        return finished;
+    }
+
+    public synchronized void setFinished(boolean finished) {
+        this.finished = finished;
+    }
 
     //A Thread manages I/O with each participant
     private class ServerThread extends Thread {
@@ -25,6 +36,7 @@ public class Coordinator
         private BufferedReader reader;
         private PrintWriter writer;
         private String id;
+
 
         ServerThread(Socket client) throws IOException {
             partSocket = client;
@@ -74,12 +86,12 @@ public class Coordinator
                     return;
                 }
 
-                outcomesRecived.put(id, ((OutcomeToken) token).getOutcome() + " - " + ((OutcomeToken) token).getPartsAsString());
-
-                //closes channels of communication
-                partSocket.close();
-                removeParticipant(id);
+                outcomesRecived.add((OutcomeToken)token);
                 checkOutcome();
+                //closes channels of communication
+                //partSocket.close();
+                //removeParticipant(id);
+
             }
             catch (IOException e) {
                 System.err.println("Caught I/O Exception.");
@@ -114,10 +126,54 @@ public class Coordinator
 
     //if all parties have joined, send details and vote options
     private synchronized void checkOutcome(){
+        //(id, ((OutcomeToken) token).getOutcome() + " - " + ((OutcomeToken) token).getPartsAsString());
+
         if (outcomesRecived.size() == parts){
             System.out.println("all outcomes recived");
-            printOutcome();
+            setFinished(true);
+            synchronized (this) {
+                this.notify();
+            }
         }
+    }
+
+    private void results(){
+
+        while (!isFinished()) {
+            try {
+                System.out.println("results waiting...");
+                synchronized (this) {
+                    this.wait();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+        }
+
+        //each time queue is added to it is checked
+        //wait until queue full or time out
+        if (outcomesRecived.size() != parts){
+            //restart votes
+        }
+
+        OutcomeToken out = outcomesRecived.poll();
+        String result = out.getOutcome();
+        String includedParts = out.getPartsAsString();
+        while (!outcomesRecived.isEmpty()) {
+            out = outcomesRecived.poll();
+            if (!out.getOutcome().equals(result)){
+                //some error
+                System.out.println("ERROR results do not match");
+            }
+        }
+
+        if(result == null){
+
+        }
+
+        System.out.println("----"+result+" " +includedParts+"----");
+
     }
 
     //wait for all parties to join
@@ -141,13 +197,6 @@ public class Coordinator
 
     }
 
-    //print outcome
-    private synchronized void printOutcome(){
-        for (String id: outcomesRecived.keySet()) {
-            System.out.println();
-            System.out.println("Result for " + id + ": " + outcomesRecived.get(id));
-        }
-    }
 
     // Send a message to all registered clients.
     private synchronized void yell(String msg)
@@ -162,7 +211,7 @@ public class Coordinator
 
 
     //Send a message to the specified recipient.
-    synchronized void tell(String id, String msg)
+    private synchronized void tell(String id, String msg)
     {
         PrintWriter pw = partMap.get(id);
         if (pw == null)
@@ -177,12 +226,12 @@ public class Coordinator
         ServerSocket listener = new ServerSocket(port);
         System.out.println("Listning...");
 
-        while (joinedCnt <= parts) {
+        do  {
             Socket client = listener.accept();
             new ServerThread(client).start();
             joinedCnt++;
             System.out.println("Participant joined " + joinedCnt + "/" + parts);
-        }
+        } while (joinedCnt < parts);
 
         listener.close();
         System.out.println("Stopped listning.");
@@ -200,16 +249,17 @@ public class Coordinator
         System.out.println("Voting options: " + Arrays.toString(votingOptions));
 
         partMap = Collections.synchronizedMap(new HashMap<String, PrintWriter>(parts));
-        outcomesRecived = Collections.synchronizedMap(new HashMap<String, String>(parts));
+        outcomesRecived = new LinkedBlockingQueue<>();
 
         startListening();
+        results();
     }
 
 
     public static void main(String[] args) throws IOException {
         Coordinator coord =  new Coordinator();
         //coord.init(args);
-        coord.init(new String[]{"1444", "3", "A", "B"});
+        coord.init(new String[]{"1444", "2", "A", "B"});
 
     }
 }

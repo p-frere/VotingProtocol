@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Participant {
 
@@ -10,13 +12,41 @@ public class Participant {
     int pport;
     int timeout;
     int failurecond;
-    int[] parts;
-    String[] voteOptions;
-    String vote;
-    PrintWriter writer;
-    BufferedReader reader;
+    int[] expectedParts;
+    private String[] voteOptions;
+    private PrintWriter writer;
+    private BufferedReader reader;
+    private String initialVote;
+    private boolean finishedVote;
 
-    private Map<String, String> votesRecived;
+
+    public synchronized int[] getExpectedParts() {
+        return expectedParts;
+    }
+
+    public synchronized void setExpectedParts(int[] expectedParts) {
+        this.expectedParts = expectedParts;
+    }
+
+
+    public synchronized String getInitialVote() {
+        return initialVote;
+    }
+
+    public synchronized void setInitialVote(String initialVote) {
+        this.initialVote = initialVote;
+    }
+
+    public synchronized boolean isFinishedVote() {
+        return finishedVote;
+    }
+
+    public synchronized void setFinishedVote(boolean finishedVote, String currentVote) {
+        this.finishedVote = finishedVote;
+        setInitialVote(currentVote);
+    }
+
+
 
     public static void main(String[] args) throws Exception {
         System.out.println("PART: Started");
@@ -27,8 +57,23 @@ public class Participant {
 
     public void initSocket(int pport) throws IOException {
 
-        //connects to the coordinator
+
         this.pport = pport;
+
+        //----------------Starts listner
+        //
+        // BlockingQueue<VoteToken> voteInQueue = new LinkedBlockingQueue<>();
+
+        List<BlockingQueue<VoteToken>> allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
+        Runnable partCoord = new PartCoord(pport, allQueues, this);
+        Runnable partListner = new ParticipantListner(pport, allQueues);
+        Thread partListnerThread = new Thread(partListner);
+        partListnerThread.start();
+
+        //add vote to votes record
+        //votesRecived.put(String.valueOf(pport), vote); //need this??
+
+        //connects to the coordinator
         try {
             socket = new Socket("127.0.0.1", cport);
             System.out.println("PART: socket connected");
@@ -60,15 +105,10 @@ public class Participant {
 
         //adding participants reviced in details
         System.out.println("PART: Participants recived: " + ((DetailsToken) token).getDetailsAsString());
-        parts = ((DetailsToken) token).getDetails();
+        setExpectedParts(((DetailsToken) token).getDetails());
 
         //allows votes to be collected
-        votesRecived  = Collections.synchronizedMap(new HashMap<String, String>(parts.length+1));
-
-        //sets up listner for newly connecting participants and new thread to coordinate them
-        PartCoord partCoord = new PartCoord(this, parts, pport);
-        Thread partListner = new ParticipantListner(partCoord, pport, parts.length);
-        partListner.start();
+        //votesRecived  = Collections.synchronizedMap(new HashMap<String, String>(parts.length+1));
 
         //waits for votes
         while (!(token instanceof VoteOptionsToken)) {
@@ -76,29 +116,40 @@ public class Participant {
 
         }
 
-        //decides vote
+        //decides vote and sets it
         System.out.println("PART: Voting options received");
         voteOptions = ((VoteOptionsToken) token).getOptions();
-        vote = voteOptions[new Random().nextInt(voteOptions.length)];
-        System.out.println("PART: Voting for " + vote);
+        setInitialVote(new VoteToken(String.valueOf(pport) + " " + voteOptions[new Random().nextInt(voteOptions.length)]).getVotesAsString());
+        System.out.println("PART: Voting for " + getInitialVote());
 
-        //add vote to votes record
-        votesRecived.put(String.valueOf(pport), vote); //need this??
 
         //sets the vote in PartCord
-        partCoord.setCurrentVoteInit(pport + " " + vote);
-        partCoord.startStreams();
-        partCoord.broadcastVote();
+        Thread partCoordThread = new Thread(partCoord);
+        partCoordThread.start();
 
-        //Does nothing until voting finished is called
-        System.out.println("PART: waiting...");
-    }
 
-    //steps called when voting finished
-    public synchronized void votingFinished(String finalVotes){
-        System.out.println("PART: Final votes -> " + finalVotes);
 
-        String items[] = finalVotes.split(" ");
+//--------------------------
+
+        while (!isFinishedVote()) {
+            try {
+                System.out.println("PART: waiting...");
+                synchronized (this) {
+                    this.wait();
+                }
+               // wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+        }
+
+//-----------------------------
+
+        System.out.println("PART: Final votes -> " + initialVote);
+
+        //calculated all who voted
+        String items[] = initialVote.split(" ");
         String[] tookPart = new String[items.length/2];
         Map<String, Integer> voteCount = new HashMap<>();
         for (int i = 0; i < items.length; i++){
@@ -112,6 +163,7 @@ public class Participant {
             }
         }
 
+        //calculating most voted
         String jointVote = null;
         int max = 0;
         for (String vote : voteCount.keySet()){
@@ -142,6 +194,5 @@ public class Participant {
         }
 
     }
-
 
 }

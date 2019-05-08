@@ -1,17 +1,18 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ParticipantListner extends Thread {
-    PartCoord partCoord;
     int pport;
-    int initPartCnt;
+    List<BlockingQueue<VoteToken>> allQueues;
 
     //Constructor
-    public ParticipantListner(PartCoord partCoord, int pport, int initPartCnt) {
-        this.partCoord = partCoord;
+    public ParticipantListner(int pport, List<BlockingQueue<VoteToken>> allQueues) {
+        this.allQueues = allQueues;
         this.pport = pport;
-        this.initPartCnt = initPartCnt;
     }
 
     @Override
@@ -24,16 +25,18 @@ public class ParticipantListner extends Thread {
             System.out.println("LIS: " + pport + " Part listner started");
 
             //accept new connections, create a new thread for them
-            while (joinedCnt <= initPartCnt) {
+            while (true) {
                 Socket client = listener.accept();
-                new ParticipantConnsOUT(client, partCoord).start();
+                BlockingQueue<VoteToken> votesRecived = new LinkedBlockingQueue<>();
+                allQueues.add(votesRecived);
+                new ParticipantConnsOUT(client, votesRecived).start();
                 joinedCnt++;
-                System.out.println("LIS: connected to part " + joinedCnt + "/" + initPartCnt);
+                System.out.println("LIS: connected to part " + joinedCnt);
             }
 
             //close when expected number of connections
-            listener.close();
-            System.out.println("LIS: Stopped part listning.");
+            //listener.close();
+            //System.out.println("LIS: Stopped part listning.");
 
         } catch (IOException e) {
             e.printStackTrace();

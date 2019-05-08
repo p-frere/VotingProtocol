@@ -1,12 +1,11 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-class PartCoord extends Thread {
-    Participant participant;
+class PartCoord implements Runnable {
     private int[] expectedParts;
     private Map<String, PrintWriter> writers;
     private ArrayList<Map<String,String>> rounds;
@@ -15,18 +14,68 @@ class PartCoord extends Thread {
     private int pport;
     private String thisVote;
     private int errorCode = 1;
+    private List<BlockingQueue<VoteToken>> allQueues;
+    private int timeout = 5000;
+    private Participant participant;
 
 
 
-    public PartCoord(Participant participant, int[] expectedParts, int pport) {
-        this.participant = participant;
-        this.expectedParts = expectedParts;
+    public PartCoord(int pport, List<BlockingQueue<VoteToken>> allQueues, Participant participant) {
+        this.allQueues = allQueues;
         this.pport = pport;
+        this.participant = participant;
         rounds = new ArrayList<>();
     }
 
     @Override
     public void run() {
+
+        boolean finished = false;
+        setCurrentVoteInit(participant.getInitialVote());
+        expectedParts = (participant.getExpectedParts());
+        startStreams();
+        broadcastVote();
+        currentRound = 1;
+
+        while(!finished) {
+
+            while(expectedParts.length != allQueues.size()){
+                //spin
+                System.out.println("CORD: Expected length not met");
+            }
+
+            for (BlockingQueue<VoteToken> q : allQueues) { //TODO better than for
+                System.out.println("CORD: polling");
+                try {
+                    VoteToken vt = q.poll(timeout, TimeUnit.MILLISECONDS);
+                    addVote(vt.getVotes()[0][0], vt.getVotesAsString());
+
+                } catch (InterruptedException e) {
+                    //TODO A too remove;
+                    System.out.println("CORD responding too slow");
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println("CORD: round finished");
+            if (compareRounds()) {
+                System.out.println("CORD: duplicate rounds, waking participant");
+                participant.setFinishedVote(true, currentVote);
+                synchronized (participant) {
+                    participant.notify();
+                }
+                //notifyAll();
+                finished = true;
+
+            } else {
+                currentVote = combineVotes();
+                currentRound++;
+                if (rounds.size() < currentRound) {
+                    rounds.add(currentRound, new HashMap<>());
+                }
+                broadcastVote();
+            }
+        }
     }
 
     public void startStreams(){
@@ -78,25 +127,6 @@ class PartCoord extends Thread {
        //         System.out.println("CORD: already in round");
                 added = false;
             }
-        }
-
-
-        if (isRoundFinished()) {
-            System.out.println("CORD: round finished");
-          if (compareRounds()) {
-              System.out.println("CORD: duplicate rounds, waking participant");
-              participant.votingFinished(currentVote);
-          } else {
-              //shop class running
-              currentVote = combineVotes();
-              currentRound++;
-              if (rounds.size() < currentRound){
-                  rounds.add(currentRound, new HashMap<>());
-              }
-              broadcastVote();
-          }
-        } else {
-            System.out.println("CORD: round not finished");
         }
     }
 

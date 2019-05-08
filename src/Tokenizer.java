@@ -23,7 +23,7 @@ enum TokenType
 class Tokenizer {
 
     public Token getToken(String string) {
-        System.out.println("TOK: recived: " + string);
+        //System.out.println("TOK: recived: " + string);
         String[] words = string.split(" ");
 
         switch (words[0]) {
