@@ -49,10 +49,22 @@ public class Participant {
 
 
     public static void main(String[] args) throws Exception {
+
         System.out.println("PART: Started");
 
         Participant participant = new Participant();
-        participant.initSocket(new Random().nextInt(500)+1500);
+        participant.init(args);
+
+    }
+
+    private void init(String[] args) throws Exception{
+        this.cport = Integer.parseInt(args[0]);
+        //this.pport = Integer.parseInt(args[1]);
+        this.pport = new Random().nextInt(500)+1500;
+        this.timeout = Integer.parseInt(args[2]);
+        this.failurecond = Integer.parseInt(args[3]);
+
+        initSocket(pport);
     }
 
     public void initSocket(int pport) throws IOException {
