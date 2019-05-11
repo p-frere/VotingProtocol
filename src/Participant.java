@@ -1,9 +1,9 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 public class Participant {
 
@@ -18,7 +18,17 @@ public class Participant {
     private BufferedReader reader;
     private String initialVote;
     private boolean finishedVote;
+    private List<BlockingQueue<VoteToken>> allQueues;
+    private boolean resest;
+    Runnable partCoord;
 
+    public synchronized boolean isResest() {
+        return resest;
+    }
+
+    public synchronized void setResest(boolean resest) {
+        this.resest = resest;
+    }
 
     public synchronized int[] getExpectedParts() {
         return expectedParts;
@@ -54,6 +64,27 @@ public class Participant {
 
         Participant participant = new Participant();
         participant.init(args);
+        participant.initSocket();
+        participant.initCoordComm();
+        participant.waitForVote();
+        participant.calculateVotes();
+        participant.temp();
+
+
+    }
+
+
+    private void temp() throws IOException {
+        String temp = null;
+        try {
+            while ((temp = reader.readLine()) != null) {
+                System.out.println("PART: read a reset");
+                reset();
+            }
+        } catch (IOException e) {
+            System.out.println("PART: timeout, no reset read");
+            //e.printStackTrace();
+        }
 
     }
 
@@ -64,26 +95,31 @@ public class Participant {
         this.timeout = Integer.parseInt(args[2]);
         this.failurecond = Integer.parseInt(args[3]);
 
-        initSocket(pport);
-    }
-
-    public void initSocket(int pport) throws IOException {
-
-
-        this.pport = pport;
-
-        //----------------Starts listner
-        //
-        // BlockingQueue<VoteToken> voteInQueue = new LinkedBlockingQueue<>();
-
-        List<BlockingQueue<VoteToken>> allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
-        Runnable partCoord = new PartCoord(pport, allQueues, this);
+        allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
+        partCoord = new PartCoord(pport, allQueues, this);
         Runnable partListner = new ParticipantListner(pport, allQueues);
         Thread partListnerThread = new Thread(partListner);
         partListnerThread.start();
+    }
 
-        //add vote to votes record
-        //votesRecived.put(String.valueOf(pport), vote); //need this??
+    private void reset() throws IOException {
+        System.out.println("PART: Restarting vote");
+        allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
+        setFinishedVote(false, "");
+        setInitialVote(new VoteToken(String.valueOf(pport) + " " + voteOptions[new Random().nextInt(voteOptions.length)]).getVotesAsString());
+        System.out.println("PART: Voting for " + getInitialVote());
+
+        setResest(true);
+        synchronized (partCoord) {
+            partCoord.notify();
+        }
+
+        waitForVote();
+        calculateVotes();
+        temp();
+    }
+
+    public void initSocket() throws IOException {
 
         //connects to the coordinator
         try {
@@ -97,6 +133,16 @@ public class Participant {
         //sets up streams
         writer = new PrintWriter(socket.getOutputStream());
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    }
+
+
+
+        //----------------Starts listner
+        //
+        // BlockingQueue<VoteToken> voteInQueue = new LinkedBlockingQueue<>();
+
+
+    private void initCoordComm() throws IOException {
 
         //requests to join vote
         String temp = new JoinToken(pport).createMessage();
@@ -139,7 +185,9 @@ public class Participant {
         Thread partCoordThread = new Thread(partCoord);
         partCoordThread.start();
 
+    }
 
+    private void waitForVote() {
 
 //--------------------------
 
@@ -149,7 +197,7 @@ public class Participant {
                 synchronized (this) {
                     this.wait();
                 }
-               // wait();
+                // wait();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 e.printStackTrace();
@@ -157,6 +205,9 @@ public class Participant {
         }
 
 //-----------------------------
+    }
+
+    private void calculateVotes() {
 
         System.out.println("PART: Final votes -> " + initialVote);
 
@@ -189,6 +240,7 @@ public class Participant {
 
             }
         }
+
         System.out.println("PART: outcome = " + jointVote);
 
         //returns outcome to coordinator
@@ -196,14 +248,14 @@ public class Participant {
         writer.println((new OutcomeToken(jointVote, tookPart)).createMessage());
         writer.flush( );
 
-        System.out.println("PART: closing...");
-        try {
-            reader.close();
-            writer.close();
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        System.out.println("PART: closing...");
+//        try {
+//            reader.close();
+//            writer.close();
+//            socket.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
     }
 

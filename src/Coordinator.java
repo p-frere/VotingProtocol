@@ -17,6 +17,9 @@ public class Coordinator
     private String[] votingOptions;
     private int timeout = 10*1000;
     boolean finished;
+    private boolean restart;
+    private final Object restartKey = new Object();
+
 
     private Map<String, PrintWriter> partMap;
     // Maps name to socket. Key is clientName, value is clientOut. */
@@ -28,6 +31,15 @@ public class Coordinator
 
     public synchronized void setFinished(boolean finished) {
         this.finished = finished;
+    }
+
+
+    public synchronized boolean isRestart() {
+        return restart;
+    }
+
+    public synchronized void setRestart(boolean restart) {
+        this.restart = restart;
     }
 
     //A Thread manages I/O with each participant
@@ -58,7 +70,7 @@ public class Coordinator
                 String temp = reader.readLine();
                 token = tokenizer.getToken(temp);
                 if (!(token instanceof JoinToken)) {
-                    System.out.println("First token not a join token");
+                    System.out.println("ST: First token not a join token");
                     partSocket.close();
                     return;
                 }
@@ -66,7 +78,7 @@ public class Coordinator
                 // Adds the ID to the list of parts
                 //?? check ports ID - should be the port it's listing on
                 id = ((JoinToken) token).getPportAsString();
-                System.out.println(id + " has been identified");
+                System.out.println("ST: "+id + " has been identified");
                 partMap.put(((JoinToken) token).getPportAsString(), writer);
 
                 //wait for all participants to join
@@ -81,20 +93,67 @@ public class Coordinator
                 // wait until votes received from participants exits.
                 token = tokenizer.getToken( reader.readLine() );
                 if (!(token instanceof OutcomeToken)) {
-                    System.out.println("Second token not a outcome token");
+                    System.out.println("ST: Second token not a outcome token");
                     partSocket.close();
                     return;
                 }
 
                 outcomesRecived.add((OutcomeToken)token);
                 checkOutcome();
-                //closes channels of communication
-                //partSocket.close();
-                //removeParticipant(id);
+
+
+            //---------------------
+                boolean repeatNeeded = false;
+                do {
+                    repeatNeeded = false;
+
+                    try {
+                        synchronized (restartKey) {
+                            System.out.println("ST: waiting for condition check");
+                            restartKey.wait();
+                            System.out.println("ST: left waiting");
+                        }
+                    } catch (InterruptedException e) {
+                        System.out.println("ST: timeout expired 2");
+                        //closes channels of communication
+                        partSocket.close();
+                        removeParticipant(id);
+                        //e.printStackTrace();
+                    }
+
+                    System.out.println("is restart = " + isRestart());
+
+                    if (isRestart()) {
+                        repeatNeeded = true;
+
+                        // we might be improperly awoken here so we loop around to see if the
+                        // condition is still true or if we timed out
+
+                        outcomesRecived.clear();
+                        tell(id, "RESTART");
+                        System.out.println("ST: waiting again now for new outcome after restart...");
+
+                        // wait until votes received from participants exits.
+                        token = tokenizer.getToken(reader.readLine());
+                        if (!(token instanceof OutcomeToken)) {
+                            System.out.println("ST: Second token not a outcome token");
+                            partSocket.close();
+                            return;
+                        }
+                        System.out.println("ST: new outcome recived");
+
+                        outcomesRecived.add((OutcomeToken) token);
+                        checkOutcome();
+
+                    }
+                } while (repeatNeeded);
+
+
+
 
             }
             catch (IOException e) {
-                System.err.println("Caught I/O Exception.");
+                System.err.println("ST: Caught I/O Exception.");
                 e.printStackTrace();
                 removeParticipant(id);
             }
@@ -138,7 +197,6 @@ public class Coordinator
     }
 
     private void results(){
-
         while (!isFinished()) {
             try {
                 System.out.println("results waiting...");
@@ -168,11 +226,21 @@ public class Coordinator
             }
         }
 
-        if(result == null){
+        System.out.println("----"+result+" " +includedParts+"----");
+
+        if(result.equals("null")){
+            System.out.println("Restart needed");
+            setFinished(false);
+            setRestart(true);
+            synchronized (restartKey) {
+                System.out.println("notifying key");
+                restartKey.notifyAll();
+            }
+            results();
 
         }
 
-        System.out.println("----"+result+" " +includedParts+"----");
+
 
     }
 

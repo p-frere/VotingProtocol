@@ -17,6 +17,7 @@ class PartCoord implements Runnable {
     private List<BlockingQueue<VoteToken>> allQueues;
     private int timeout = 5000;
     private Participant participant;
+    private boolean connectionsMade;
 
 
 
@@ -24,16 +25,43 @@ class PartCoord implements Runnable {
         this.allQueues = allQueues;
         this.pport = pport;
         this.participant = participant;
-        rounds = new ArrayList<>();
+        connectionsMade = false;
+
     }
+
 
     @Override
     public void run() {
+        boolean repeatNeeded;
+        do {
+            repeatNeeded = false;
+            beginVote();
+            while (!participant.isResest()) {
+                try {
+                    System.out.println("COORD: wait for reset signal");
+                    synchronized (this) {
+                        this.wait();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
 
+            System.out.println("CORD: got reset signal");
+            repeatNeeded = true;
+        } while (repeatNeeded);
+
+    }
+
+    private void beginVote() {
+        participant.setResest(false);
         boolean finished = false;
+        rounds = new ArrayList<>();
         setCurrentVoteInit(participant.getInitialVote());
-        expectedParts = (participant.getExpectedParts());
-        startStreams();
+        if (!connectionsMade) {
+            expectedParts = (participant.getExpectedParts()); //not reset safe
+            startStreams(); //not reset safe (reset data strucutes at the end?)
+        }
         broadcastVote();
         currentRound = 1;
 
@@ -64,8 +92,9 @@ class PartCoord implements Runnable {
                 synchronized (participant) {
                     participant.notify();
                 }
-                //notifyAll();
                 finished = true;
+                //for reset----------------------
+                rounds = new ArrayList<>();
 
             } else {
                 currentVote = combineVotes();
@@ -91,6 +120,7 @@ class PartCoord implements Runnable {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+        connectionsMade = true;
     }
 
     public void setCurrentVoteInit(String currentVote){
@@ -134,15 +164,6 @@ class PartCoord implements Runnable {
 
     }
 
-    public boolean isRoundFinished(){
-        //if size is correct
-       // System.out.println("------current round " + currentRound);
-       // System.out.println("------- how many rounds " + rounds.size());
-      //  System.out.println("------- current round size " +  rounds.get(currentRound).size());
-       // System.out.println("------- expected length " +  expectedParts.length);
-
-        return rounds.get(currentRound).size() == expectedParts.length;
-    }
 
     private String combineVotes(){
         Map<String, String> votes = new HashMap<>();
