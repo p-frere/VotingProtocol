@@ -8,11 +8,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ParticipantListner extends Thread {
     int pport;
     List<BlockingQueue<VoteToken>> allQueues;
+    Participant participant;
 
     //Constructor
-    public ParticipantListner(int pport, List<BlockingQueue<VoteToken>> allQueues) {
+    public ParticipantListner(int pport, List<BlockingQueue<VoteToken>> allQueues, Participant participant) {
         this.allQueues = allQueues;
         this.pport = pport;
+        this.participant = participant;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class ParticipantListner extends Thread {
                 Socket client = listener.accept();
                 BlockingQueue<VoteToken> votesRecived = new LinkedBlockingQueue<>();
                 allQueues.add(votesRecived);
-                new ParticipantConnsOUT(client, votesRecived).start();
+                new ParticipantConnsOUT(client, votesRecived, participant).start();
                 joinedCnt++;
                 System.out.println("LIS: connected to part " + joinedCnt);
             }

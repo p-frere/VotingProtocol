@@ -19,8 +19,15 @@ public class Participant {
     private String initialVote;
     private boolean finishedVote;
     private List<BlockingQueue<VoteToken>> allQueues;
+    private List<BlockingQueue<VoteToken>> toRemove;
     private boolean resest;
     Runnable partCoord;
+    private String debugVote;
+
+    public List<BlockingQueue<VoteToken>> getToRemove() {
+        return toRemove;
+    }
+
 
     public synchronized boolean isResest() {
         return resest;
@@ -56,9 +63,8 @@ public class Participant {
         setInitialVote(currentVote);
     }
 
-
-
     public static void main(String[] args) throws Exception {
+        //ccord pport timeout failurecond
 
         System.out.println("PART: Started");
 
@@ -90,14 +96,17 @@ public class Participant {
 
     private void init(String[] args) throws Exception{
         this.cport = Integer.parseInt(args[0]);
-        //this.pport = Integer.parseInt(args[1]);
-        this.pport = new Random().nextInt(500)+1500;
+        this.pport = Integer.parseInt(args[1]);
+        //this.pport = new Random().nextInt(500)+1500;
         this.timeout = Integer.parseInt(args[2]);
         this.failurecond = Integer.parseInt(args[3]);
+        //this.debugVote = args[4];
+
+        toRemove = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
 
         allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
-        partCoord = new PartCoord(pport, allQueues, this);
-        Runnable partListner = new ParticipantListner(pport, allQueues);
+        partCoord = new PartCoord(pport, allQueues, this, timeout, failurecond, toRemove);
+        Runnable partListner = new ParticipantListner(pport, allQueues, this);
         Thread partListnerThread = new Thread(partListner);
         partListnerThread.start();
     }

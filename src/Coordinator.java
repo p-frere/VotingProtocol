@@ -154,7 +154,7 @@ public class Coordinator
             }
             catch (IOException e) {
                 System.err.println("ST: Caught I/O Exception.");
-                e.printStackTrace();
+                //e.printStackTrace();
                 removeParticipant(id);
             }
         }
@@ -163,6 +163,8 @@ public class Coordinator
         private void removeParticipant(String id){
             partMap.remove(id);
             System.out.println(id + " removed");
+            //This is needed if waiting end error 2 occures
+            checkOutcome();
         }
 
         //get a String[] of all the participants excluding current self
@@ -186,8 +188,8 @@ public class Coordinator
     //if all parties have joined, send details and vote options
     private synchronized void checkOutcome(){
         //(id, ((OutcomeToken) token).getOutcome() + " - " + ((OutcomeToken) token).getPartsAsString());
-
-        if (outcomesRecived.size() == parts){
+        System.out.println("Check outcome" + outcomesRecived.size() + " " + partMap.size());
+        if (outcomesRecived.size() == partMap.size()){
             System.out.println("all outcomes recived");
             setFinished(true);
             synchronized (this) {

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 class ParticipantConnsOUT extends Thread {
@@ -8,12 +9,14 @@ class ParticipantConnsOUT extends Thread {
     PrintWriter writer;
     Socket partSocket;
     BlockingQueue<VoteToken> votesRecived;
+    Participant participant;
 
 
-    public ParticipantConnsOUT(Socket partSocket, BlockingQueue<VoteToken> votesRecived){
+    public ParticipantConnsOUT(Socket partSocket, BlockingQueue<VoteToken> votesRecived, Participant participant){
         this.partSocket = partSocket;
         System.out.println("CONS: new thread created for voting");
         this.votesRecived = votesRecived;
+        this.participant = participant;
     }
 
 
@@ -46,7 +49,10 @@ class ParticipantConnsOUT extends Thread {
         } catch (IOException e) {
             //if connection dies, send alert
             //TODO what to do here
-            e.printStackTrace();
+            System.out.println("!!!CONS: Caught I/O Exception!!!");
+            participant.getToRemove().add(votesRecived);
+            //allQueues.remove(votesRecived);
+            //e.printStackTrace();
         }
 
 
