@@ -6,7 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 class PartCoord implements Runnable {
-    private int[] expectedParts;
+    private int[] initPartSockets;
     private Map<String, PrintWriter> writers;
     private ArrayList<Map<String,String>> rounds;
     private int currentRound;
@@ -64,8 +64,8 @@ class PartCoord implements Runnable {
         rounds = new ArrayList<>();
         setCurrentVoteInit(participant.getInitialVote());
         if (!connectionsMade) {
-            expectedParts = (participant.getExpectedParts()); //TODO not reset safe
-            noActiveParts = expectedParts.length;
+            initPartSockets = (participant.getExpectedParts()); //TODO not reset safe
+            noActiveParts = initPartSockets.length;
             startStreams(); //not reset safe (reset data strucutes at the end?)
         }
 
@@ -141,7 +141,7 @@ class PartCoord implements Runnable {
         writers = new HashMap<>();
         try {
 
-            for(int port: expectedParts){
+            for(int port: initPartSockets){
                 Socket tempSocket = new Socket("127.0.0.1", port);
                 writers.put(String.valueOf(port), new PrintWriter(tempSocket.getOutputStream()));
             }

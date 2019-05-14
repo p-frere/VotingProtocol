@@ -1,18 +1,16 @@
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class Participant {
 
     Socket socket = null;
-    int cport = 1444;
-    int pport;
-    int timeout;
-    int failurecond;
-    int[] expectedParts;
+    private int cport;
+    private int pport;
+    private int timeout;
+    private int failurecond;
+    private int[] expectedParts;
     private String[] voteOptions;
     private PrintWriter writer;
     private BufferedReader reader;
@@ -27,44 +25,33 @@ public class Participant {
     public List<BlockingQueue<VoteToken>> getToRemove() {
         return toRemove;
     }
-
-
     public synchronized boolean isResest() {
         return resest;
     }
-
     public synchronized void setResest(boolean resest) {
         this.resest = resest;
     }
-
     public synchronized int[] getExpectedParts() {
         return expectedParts;
     }
-
     public synchronized void setExpectedParts(int[] expectedParts) {
         this.expectedParts = expectedParts;
     }
-
-
     public synchronized String getInitialVote() {
         return initialVote;
     }
-
     public synchronized void setInitialVote(String initialVote) {
         this.initialVote = initialVote;
     }
-
     public synchronized boolean isFinishedVote() {
         return finishedVote;
     }
-
     public synchronized void setFinishedVote(boolean finishedVote, String currentVote) {
         this.finishedVote = finishedVote;
         setInitialVote(currentVote);
     }
 
     public static void main(String[] args) throws Exception {
-        //ccord pport timeout failurecond
 
         System.out.println("PART: Started");
 

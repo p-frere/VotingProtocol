@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bfd8a11c-bcc5-40f4-aee8-46834ac71669" name="Default Changelist" comment="added restart on draw" />
+    <list default="true" id="bfd8a11c-bcc5-40f4-aee8-46834ac71669" name="Default Changelist" comment="added restart on draw">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Coordinator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Coordinator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/PartCoord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/PartCoord.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Participant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Participant.java" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.idea/shelf/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,14 +22,14 @@
     <option name="isMigrated" value="true" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.35750636">
+    <splitter split-orientation="horizontal" split-proportion="0.19654842">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/Coordinator.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="15">
-                  <caret line="25" column="21" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
+                <state relative-caret-position="3288">
+                  <caret line="188" column="56" selection-start-line="188" selection-start-column="56" selection-end-line="188" selection-end-column="56" />
                   <folding>
                     <element signature="imports" expanded="true" />
                     <element signature="e#791#792#0" expanded="true" />
@@ -43,7 +48,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/Tokenizer.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="30">
+                <state relative-caret-position="42">
                   <caret line="2" selection-start-line="2" selection-end-line="10" selection-end-column="1" />
                 </state>
               </provider>
@@ -56,8 +61,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/ParticipantListner.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="375">
-                  <caret line="30" column="22" selection-start-line="30" selection-start-column="22" selection-end-line="30" selection-end-column="22" />
+                <state relative-caret-position="483">
+                  <caret line="35" column="52" selection-start-line="35" selection-start-column="52" selection-end-line="35" selection-end-column="52" />
                   <folding>
                     <element signature="imports" expanded="true" />
                   </folding>
@@ -68,8 +73,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/PartCoord.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2310">
-                  <caret line="159" selection-start-line="159" selection-end-line="159" />
+                <state relative-caret-position="399">
+                  <caret line="19" column="26" lean-forward="true" selection-start-line="19" selection-start-column="26" selection-end-line="19" selection-end-column="26" />
                   <folding>
                     <element signature="imports" expanded="true" />
                   </folding>
@@ -92,12 +97,11 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/Participant.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="202">
-                  <caret line="118" column="48" selection-start-line="118" selection-start-column="48" selection-end-line="118" selection-end-column="48" />
+                <state relative-caret-position="336">
+                  <caret line="16" column="12" selection-start-line="16" selection-start-column="12" selection-end-line="16" selection-end-column="12" />
                   <folding>
                     <element signature="imports" expanded="true" />
-                    <element signature="e#718#719#0" expanded="true" />
-                    <element signature="e#749#750#0" expanded="true" />
+                    <element signature="method#setFinishedVote#0;class#Participant#0" />
                   </folding>
                 </state>
               </provider>
@@ -141,6 +145,9 @@
       <find>new rou</find>
       <find>rounds.add</find>
       <find>expectedParts</find>
+      <find>waitFor</find>
+      <find>checkO</find>
+      <find>waiting again</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -151,19 +158,12 @@
       <list>
         <option value="$PROJECT_DIR$/src/ParticipantConnection.java" />
         <option value="$PROJECT_DIR$/src/ParticipantConnsIN.java" />
-        <option value="$PROJECT_DIR$/src/ParticipantListner.java" />
         <option value="$PROJECT_DIR$/src/ParticipantConnsOUT.java" />
+        <option value="$PROJECT_DIR$/src/Tokenizer.java" />
+        <option value="$PROJECT_DIR$/src/ParticipantListner.java" />
+        <option value="$PROJECT_DIR$/src/Coordinator.java" />
         <option value="$PROJECT_DIR$/src/PartCoord.java" />
         <option value="$PROJECT_DIR$/src/Participant.java" />
-        <option value="$PROJECT_DIR$/src/Coordinator.java" />
-        <option value="$PROJECT_DIR$/src/Tokenizer.java" />
-      </list>
-    </option>
-  </component>
-  <component name="ProjectConfigurationFiles">
-    <option name="files">
-      <list>
-        <option value="$PROJECT_DIR$/.idea/vcs.xml" />
       </list>
     </option>
   </component>
@@ -206,7 +206,7 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -220,7 +220,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.Coordinator">
+  <component name="RunManager" selected="Multirun.Unnamed">
     <configuration default="true" type="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
@@ -263,7 +263,7 @@
     <configuration name="Participant1" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="Participant" />
       <module name="votingProtocol" />
-      <option name="PROGRAM_PARAMETERS" value="1799 1801 5000 2" />
+      <option name="PROGRAM_PARAMETERS" value="1799 1801 5000 0" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -271,7 +271,7 @@
     <configuration name="Participant2" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="Participant" />
       <module name="votingProtocol" />
-      <option name="PROGRAM_PARAMETERS" value="1799 1802 5000 2" />
+      <option name="PROGRAM_PARAMETERS" value="1799 1802 5000 0" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -279,7 +279,7 @@
     <configuration name="Participant3" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="Participant" />
       <module name="votingProtocol" />
-      <option name="PROGRAM_PARAMETERS" value="1799 1803 5000 0" />
+      <option name="PROGRAM_PARAMETERS" value="1799 1803 5000 2" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -296,6 +296,20 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration name="Unnamed" type="Multirun" factoryName="Multirun" separateTabs="false" startOneByOne="true" markFailedProcess="false" hideSuccessProcess="false" delayTime="1">
+      <runConfiguration name="Coordinator" type="Application" />
+      <runConfiguration name="Participant" type="Application" />
+      <runConfiguration name="Participant1" type="Application" />
+      <runConfiguration name="Participant2" type="Application" />
+      <runConfiguration name="Participant3" type="Application" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Multirun" factoryName="Multirun" separateTabs="false" startOneByOne="true" markFailedProcess="true" hideSuccessProcess="false" delayTime="1">
+      <runConfiguration name="Coordinator" type="Application" />
+      <runConfiguration name="Participant1" type="Application" />
+      <runConfiguration name="Participant2" type="Application" />
+      <method v="2" />
     </configuration>
     <configuration default="true" type="TestNG">
       <option name="TEST_OBJECT" value="CLASS" />
@@ -321,11 +335,12 @@
       <item itemvalue="Application.Participant3" />
       <item itemvalue="Application.Coordinator" />
       <item itemvalue="Application.Participant" />
+      <item itemvalue="Multirun.Unnamed" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Coordinator" />
         <item itemvalue="Application.Participant" />
+        <item itemvalue="Application.Coordinator" />
         <item itemvalue="Application.Participant" />
       </list>
     </recent_temporary>
@@ -347,7 +362,8 @@
       <workItem from="1557422233587" duration="46786000" />
       <workItem from="1557684661107" duration="3276000" />
       <workItem from="1557691443847" duration="2082000" />
-      <workItem from="1557842250583" duration="292000" />
+      <workItem from="1557842250583" duration="725000" />
+      <workItem from="1557843072301" duration="6101000" />
     </task>
     <task id="LOCAL-00001" summary="started participant communication">
       <created>1557083491797</created>
@@ -402,7 +418,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="122836000" />
+    <option name="totallyTimeSpent" value="129370000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -416,7 +432,7 @@
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.060962565" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.09625668" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -425,14 +441,14 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Messages" order="0" weight="0.32887492" />
       <window_info anchor="bottom" id="Message" order="1" />
-      <window_info anchor="bottom" id="Find" order="2" />
+      <window_info anchor="bottom" id="Find" order="2" weight="0.32936078" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3296617" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Version Control" order="8" weight="0.109375" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.32800853" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="8" visible="true" weight="0.3531961" />
+      <window_info anchor="bottom" id="Terminal" order="9" weight="0.32800853" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="11" />
       <window_info anchor="right" x="1527" y="92" width="941" height="1216" id="Documentation" order="0" type="FLOATING" />
@@ -445,7 +461,7 @@
       <window_info anchor="right" id="Maven Projects" order="7" />
       <window_info anchor="right" id="Database" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
-      <window_info anchor="right" id="Run" order="10" sideWeight="0.49649122" weight="0.18920973" />
+      <window_info anchor="right" id="Run" order="10" sideWeight="0.49649122" visible="true" weight="0.34598932" />
       <window_info anchor="right" id="Coverage" order="11" sideWeight="0.50350875" side_tool="true" weight="0.44157392" />
       <window_info anchor="right" id="Maven" order="12" />
     </layout>
@@ -511,10 +527,44 @@
     <entry file="jar://C:/Program Files/Java/jdk-9.0.1/lib/src.zip!/java.base/java/lang/Object.java" />
     <entry file="jar://C:/Program Files/Java/jdk-9.0.1/lib/src.zip!/java.base/jdk/internal/util/Preconditions.java" />
     <entry file="jar://C:/Program Files/Java/jdk-9.0.1/lib/src.zip!/java.base/java/util/ArrayList.java" />
+    <entry file="file://$PROJECT_DIR$/src/Tokenizer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" selection-start-line="2" selection-end-line="10" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ParticipantConnsOUT.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="735">
+          <caret line="52" column="54" selection-start-line="52" selection-start-column="54" selection-end-line="52" selection-end-column="54" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ParticipantListner.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="483">
+          <caret line="35" column="52" selection-start-line="35" selection-start-column="52" selection-end-line="35" selection-end-column="52" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CoordinatorThread.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="30" selection-start-column="30" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Coordinator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="25" column="21" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
+        <state relative-caret-position="3288">
+          <caret line="188" column="56" selection-start-line="188" selection-start-column="56" selection-end-line="188" selection-end-column="56" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#791#792#0" expanded="true" />
@@ -529,37 +579,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Tokenizer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="10" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/ParticipantListner.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="30" column="22" selection-start-line="30" selection-start-column="22" selection-end-line="30" selection-end-column="22" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/PartCoord.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2310">
-          <caret line="159" selection-start-line="159" selection-end-line="159" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/ParticipantConnsOUT.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="735">
-          <caret line="52" column="54" selection-start-line="52" selection-start-column="54" selection-end-line="52" selection-end-column="54" />
+        <state relative-caret-position="399">
+          <caret line="19" column="26" lean-forward="true" selection-start-line="19" selection-start-column="26" selection-end-line="19" selection-end-column="26" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -568,12 +591,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Participant.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="118" column="48" selection-start-line="118" selection-start-column="48" selection-end-line="118" selection-end-column="48" />
+        <state relative-caret-position="336">
+          <caret line="16" column="12" selection-start-line="16" selection-start-column="12" selection-end-line="16" selection-end-column="12" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#718#719#0" expanded="true" />
-            <element signature="e#749#750#0" expanded="true" />
+            <element signature="method#setFinishedVote#0;class#Participant#0" />
           </folding>
         </state>
       </provider>
