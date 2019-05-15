@@ -226,9 +226,9 @@ class PartCoord implements Runnable {
     }
 
     public boolean compareRounds(){
-        System.out.println("CORD comparing round " + currentRound + " & " + (currentRound-1));
-        System.out.println("CORD: " + convertWithIteration(rounds.get(currentRound)));
-        System.out.println("CORD: " + convertWithIteration(rounds.get(currentRound-1)));
+//        System.out.println("CORD comparing round " + currentRound + " & " + (currentRound-1));
+//        System.out.println("CORD: " + convertWithIteration(rounds.get(currentRound)));
+//        System.out.println("CORD: " + convertWithIteration(rounds.get(currentRound-1)));
 
         if (currentRound == 0)
             return false;
@@ -244,11 +244,18 @@ class PartCoord implements Runnable {
             Map<String, String > orderPrev = new HashMap<>();
 
             for (String partId : cur.keySet()){
-                orderCur.put(partId, cur.get(partId));
+                String[] pairing = cur.get(partId).split(" ");
+                for (int i = 0; i < pairing.length; i+=2){
+                    orderCur.put(pairing[i], pairing[i+1]);
+                }
             }
 
             for (String partId : prev.keySet()){
-                orderPrev.put(partId, prev.get(partId));
+                String[] pairing = prev.get(partId).split(" ");
+                //System.out.println(Arrays.toString(pairing));
+                for (int i = 0; i < pairing.length; i+=2){
+                    orderPrev.put(pairing[i], pairing[i+1]);
+                }
             }
 
             if (orderCur.equals(orderPrev)){
