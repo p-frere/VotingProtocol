@@ -31,7 +31,7 @@ public class ParticipantListner extends Thread {
                 Socket client = listener.accept();
                 BlockingQueue<VoteToken> votesRecived = new LinkedBlockingQueue<>();
                 allQueues.add(votesRecived);
-                new ParticipantConnsOUT(client, votesRecived, participant).start();
+                new ParticipantConnsOUT(client, votesRecived, participant, allQueues.indexOf(votesRecived)).start();
                 joinedCnt++;
                 System.out.println("LIS: connected to part " + joinedCnt);
             }

@@ -3,6 +3,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 class PartCoord implements Runnable {
@@ -21,7 +22,10 @@ class PartCoord implements Runnable {
     private int noActiveParts;
     List<BlockingQueue<VoteToken>> toRemove;
 
-
+    private CountDownLatch resetCountdown;
+    private CountDownLatch votesFinishedCountdown;
+    private CountDownLatch roundCountdown;
+    private List<Integer> deadList;
 
     public PartCoord(int pport, List<BlockingQueue<VoteToken>> allQueues, Participant participant, int timeout, int failureCond, List<BlockingQueue<VoteToken>> toRemove) {
         this.allQueues = allQueues;
@@ -32,78 +36,97 @@ class PartCoord implements Runnable {
         connectionsMade = false;
         this.toRemove = toRemove;
 
+        resetCountdown = participant.getResetCountdown();
+        deadList = participant.getDeadList();
+
     }
 
 
     @Override
     public void run() {
-        boolean repeatNeeded;
+
+        beginVote();
+
         do {
-            repeatNeeded = false;
-            beginVote();
-            while (!participant.isResest()) {
-                try {
-                    System.out.println("COORD: wait for reset signal");
-                    synchronized (this) {
-                        this.wait();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+            try {
+
+                System.out.println("COORD: wait for reset signal");
+                System.out.println("COORD: " + resetCountdown.getCount());
+                if (!resetCountdown.await(10L, TimeUnit.SECONDS)) {
+                    System.out.println("COORD: Timed out");
+                    Runtime.getRuntime().halt(0);
                 }
+
+                System.out.println("CORD: got reset signal");
+                resetCountdown = new CountDownLatch(1);
+                beginVote();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
-            System.out.println("CORD: got reset signal");
-            repeatNeeded = true;
-        } while (repeatNeeded);
+        } while (true);
 
     }
 
     private void beginVote() {
-        participant.setResest(false);
+        //roundCountdown = participant.getRoundCountdown();
+        votesFinishedCountdown = participant.getVotesFinishedCountdown();
+
+        //setup for variables and votes
         boolean finished = false;
         rounds = new ArrayList<>();
         setCurrentVoteInit(participant.getInitialVote());
+
+        //sets up connections, only need to do once
         if (!connectionsMade) {
-            initPartSockets = (participant.getExpectedParts()); //TODO not reset safe
-            noActiveParts = initPartSockets.length;
-            startStreams(); //not reset safe (reset data strucutes at the end?)
+            initPartSockets = (participant.getExpectedParts());
+            noActiveParts = participant.getActiveParts();
+            startStreams();
         }
 
-
-        currentRound = 1;
-
+        //sends vote data to other participants
         broadcastVote();
 
-
+        //spins until correct number of participants joined
         while(noActiveParts != allQueues.size()){
             //spin
             System.out.println("CORD: Expected length not met");
         }
 
         while(!finished) {
+            //try {
+                System.out.println("CORD: All parts present, waiting on round...");
+                //roundCountdown.await();
 
-            for (BlockingQueue<VoteToken> q : allQueues) { //TODO better than for
-                System.out.println("CORD: polling");
-                try {
-                        VoteToken vt = q.poll(timeout, TimeUnit.MILLISECONDS);
+                for (int q = 0; q < allQueues.size(); q++){
+                //for (BlockingQueue<VoteToken> q : allQueues) { //TODO better than for
+//                        if(!q.isEmpty()) {
+//                            VoteToken vt = q.poll();
+//                            addVote(vt.getVotes()[0][0], vt.getVotesAsString());
+//                        } else {
+//                            System.out.println("CORD: null skipped");
+//                        }
+
+                    if(!deadList.contains(q)) { //if a is not marked as dead
+                        VoteToken vt = null;
+                        try {
+                            vt = allQueues.get(q).poll(3L, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         if (vt != null)
-                            addVote(vt.getVotes()[0][0], vt.getVotesAsString());
-                        else
-                            System.out.println("CORD: VT = null");
-
-                } catch (InterruptedException e) {
-                    //TODO A too remove;
-                    System.out.println("CORD responding too slow");
-                    e.printStackTrace();
+                                addVote(vt.getVotes()[0][0], vt.getVotesAsString());
+                    } else {
+                        System.out.println("CORD: null skipped");
+                    }
                 }
-            }
 
-            if (!toRemove.isEmpty()){
-                System.out.println("DSFSADFAS");
-                allQueues.remove(toRemove.get(0));
-                toRemove.remove(0);
-                noActiveParts--;
-            }
+
+//            } catch (InterruptedException e) {
+//                System.out.println("COORD: interupted");
+//                e.printStackTrace();
+//            }
 
             System.out.println("CORD: round finished");
             if (compareRounds()) {
@@ -114,12 +137,9 @@ class PartCoord implements Runnable {
 
                 }
                 participant.setFinishedVote(true, currentVote);
-                synchronized (participant) {
-                    participant.notify();
-                }
+                votesFinishedCountdown.countDown();
+                System.out.println("COORD: votes finished countdown = " + votesFinishedCountdown.getCount());
                 finished = true;
-                //for reset----------------------
-                rounds = new ArrayList<>();
 
             } else {
 
@@ -136,16 +156,15 @@ class PartCoord implements Runnable {
         }
     }
 
+    //connects writers to all other participants
     public void startStreams(){
         System.out.println("CORD: Populating writers");
         writers = new HashMap<>();
         try {
-
             for(int port: initPartSockets){
                 Socket tempSocket = new Socket("127.0.0.1", port);
                 writers.put(String.valueOf(port), new PrintWriter(tempSocket.getOutputStream()));
             }
-
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -157,37 +176,14 @@ class PartCoord implements Runnable {
         this.thisVote = currentVote.split(" ")[1];
         System.out.println("CORD: current vote set to " + currentVote);
         rounds.add(0,new HashMap<>());
-        rounds.add(1,new HashMap<>());
         rounds.get(0).put(String.valueOf(pport), currentVote);
+        rounds.add(1,new HashMap<>());
         currentRound = 1;
     }
 
     public synchronized void addVote(String id, String votes){
         System.out.println("CORD: adding vote ---- " + votes);
         rounds.get(currentRound).put(id, votes);
-//        int i = currentRound;
-//        boolean added = false;
-//        while (!added) {
-//            //reached a new round, make one
-//            if (rounds.size() <= i) {
-//                System.out.println("CORD: new round add in weird way");
-//                rounds.add(i,new HashMap<>());
-//            }
-//
-//            //if not in the current round, add
-//            if (!rounds.get(i).containsKey(id)) {
-//                System.out.println("--------" + votes);
-//                rounds.get(i).put(id, votes);
-//                //exit loop
-//                System.out.println("CORD: added to current round");
-//                added = true;
-//            } else {
-//                //else increase round
-//                i++;
-//                System.out.println("CORD: already in round");
-//                added = false;
-//            }
-//        }
     }
 
 
@@ -215,7 +211,7 @@ class PartCoord implements Runnable {
         //add each id and vote option into the hashmap
         for (String[] row : pairing){
             votes.put(row[0],row[1]);
-            System.out.println("adding " + Arrays.toString(row));
+            //System.out.println("adding " + Arrays.toString(row));
         }
 
 
@@ -240,9 +236,19 @@ class PartCoord implements Runnable {
         return sb.toString();
     }
 
+    public String convertWithIteration(Map<String, ?> map) {
+        StringBuilder mapAsString = new StringBuilder("{");
+        for (String key : map.keySet()) {
+            mapAsString.append(key + "=" + map.get(key) + ", ");
+        }
+        return mapAsString.toString();
+    }
 
     public boolean compareRounds(){
         System.out.println("CORD comparing round " + currentRound + " & " + (currentRound-1));
+        System.out.println("CORD: " + convertWithIteration(rounds.get(currentRound)));
+        System.out.println("CORD: " + convertWithIteration(rounds.get(currentRound-1)));
+
         if (currentRound == 0)
             return false;
         else if (rounds.get(currentRound).equals(rounds.get(currentRound-1))){

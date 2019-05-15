@@ -183,6 +183,12 @@ public class Coordinator
         System.out.println("Got all outcomes");
 
         results();
+        close();
+    }
+
+    private void close(){
+        //TODO
+        Runtime.getRuntime().halt(0);
     }
 
     //calculates the results

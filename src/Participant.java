@@ -16,20 +16,66 @@ public class Participant {
     private BufferedReader reader;
     private String initialVote;
     private boolean finishedVote;
+
+    public List<BlockingQueue<VoteToken>> getAllQueues() {
+        return allQueues;
+    }
+
+    public void setAllQueues(List<BlockingQueue<VoteToken>> allQueues) {
+        this.allQueues = allQueues;
+    }
+
     private List<BlockingQueue<VoteToken>> allQueues;
     private List<BlockingQueue<VoteToken>> toRemove;
-    private boolean resest;
     Runnable partCoord;
     private String debugVote;
+    private List<Integer> deadList;
+
+    private CountDownLatch resetCountdown; //size 1, if 0, then reset
+    private CountDownLatch votesFinishedCountdown; //if 0 then vote is sumbitted. EITHER O OR 1
+    private Integer activeParts;
+    //private CountDownLatch roundCountdown; //if zero new round
+
+//    public CountDownLatch getRoundCountdown() {
+//        return roundCountdown;
+//    }
+//
+//    public void setRoundCountdown(CountDownLatch roundCountdown) {
+//        this.roundCountdown = roundCountdown;
+//    }
+
+    public synchronized Integer getActiveParts() {
+        return activeParts;
+    }
+
+    public synchronized void setActiveParts(Integer activeParts) {
+        this.activeParts = activeParts;
+    }
+
+    public CountDownLatch getVotesFinishedCountdown() {
+        return votesFinishedCountdown;
+    }
+
+    public synchronized CountDownLatch getResetCountdown() {
+        return resetCountdown;
+    }
+
+    public synchronized void setResetCountdown(CountDownLatch resetCountdown) {
+        this.resetCountdown = resetCountdown;
+    }
+
+    public List<Integer> getDeadList() {
+        return deadList;
+    }
+
+    public void setDeadList(List<Integer> deadList) {
+        this.deadList = deadList;
+    }
+
+
 
     public List<BlockingQueue<VoteToken>> getToRemove() {
         return toRemove;
-    }
-    public synchronized boolean isResest() {
-        return resest;
-    }
-    public synchronized void setResest(boolean resest) {
-        this.resest = resest;
     }
     public synchronized int[] getExpectedParts() {
         return expectedParts;
@@ -51,34 +97,46 @@ public class Participant {
         setInitialVote(currentVote);
     }
 
+
     public static void main(String[] args) throws Exception {
-
         System.out.println("PART: Started");
+        new Participant(args);
+    }
 
-        Participant participant = new Participant();
-        participant.init(args);
-        participant.initSocket();
-        participant.initCoordComm();
-        participant.waitForVote();
-        participant.calculateVotes();
-        participant.temp();
-
-
+    public Participant(String args[]) throws Exception {
+        init(args);
+        initSocket();
+        initCoordComm();
+        votesFinishedCountdown.await();
+        System.out.println("PART VOTES FINISHED");
+        calculateVotes();
+        reset();
+        close();
     }
 
 
-    private void temp() throws IOException {
+    private void reset() throws IOException, InterruptedException {
         String temp = null;
         try {
             while ((temp = reader.readLine()) != null) {
                 System.out.println("PART: read a reset");
+                votesFinishedCountdown = new CountDownLatch(1);
+                allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
+                setFinishedVote(false, "");
+                setInitialVote(new VoteToken(String.valueOf(pport) + " " + voteOptions[new Random().nextInt(voteOptions.length)]).getVotesAsString());
+                System.out.println("PART: Voting for " + getInitialVote());
+                //roundCountdown = new CountDownLatch(getActiveParts());
+
+                System.out.println("PART: ----------------->" + resetCountdown.getCount());
+                resetCountdown.countDown();
+                System.out.println("PART: ----------------->" + resetCountdown.getCount());
+                votesFinishedCountdown.await();
+                calculateVotes();
                 reset();
             }
         } catch (IOException e) {
             System.out.println("PART: timeout, no reset read");
-            //e.printStackTrace();
         }
-
     }
 
     private void init(String[] args) throws Exception{
@@ -89,30 +147,14 @@ public class Participant {
         this.failurecond = Integer.parseInt(args[3]);
         //this.debugVote = args[4];
 
+        resetCountdown = new CountDownLatch(1);
+        deadList = Collections.synchronizedList(new ArrayList<Integer>());
         toRemove = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
-
         allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
         partCoord = new PartCoord(pport, allQueues, this, timeout, failurecond, toRemove);
         Runnable partListner = new ParticipantListner(pport, allQueues, this);
         Thread partListnerThread = new Thread(partListner);
         partListnerThread.start();
-    }
-
-    private void reset() throws IOException {
-        System.out.println("PART: Restarting vote");
-        allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
-        setFinishedVote(false, "");
-        setInitialVote(new VoteToken(String.valueOf(pport) + " " + voteOptions[new Random().nextInt(voteOptions.length)]).getVotesAsString());
-        System.out.println("PART: Voting for " + getInitialVote());
-
-        setResest(true);
-        synchronized (partCoord) {
-            partCoord.notify();
-        }
-
-        waitForVote();
-        calculateVotes();
-        temp();
     }
 
     public void initSocket() throws IOException {
@@ -133,11 +175,7 @@ public class Participant {
 
 
 
-        //----------------Starts listner
-        //
-        // BlockingQueue<VoteToken> voteInQueue = new LinkedBlockingQueue<>();
-
-
+    //----------------Starts listner
     private void initCoordComm() throws IOException {
 
         //requests to join vote
@@ -150,7 +188,6 @@ public class Participant {
         System.out.println("PART: Waiting for reads..");
         Tokenizer tokenizer = new Tokenizer();
         Token token = null;
-//        while ((token = tokenizer.getToken(reader.readLine())) != null) {
         token = tokenizer.getToken(reader.readLine());
         while (!(token instanceof DetailsToken)) {
             token = tokenizer.getToken(reader.readLine());
@@ -161,8 +198,10 @@ public class Participant {
         System.out.println("PART: Participants recived: " + ((DetailsToken) token).getDetailsAsString());
         setExpectedParts(((DetailsToken) token).getDetails());
 
-        //allows votes to be collected
-        //votesRecived  = Collections.synchronizedMap(new HashMap<String, String>(parts.length+1));
+        //Further set up after more details recived
+        setActiveParts(expectedParts.length);
+        votesFinishedCountdown = new CountDownLatch(1);
+        //roundCountdown = new CountDownLatch(getActiveParts());
 
         //waits for votes
         while (!(token instanceof VoteOptionsToken)) {
@@ -183,25 +222,6 @@ public class Participant {
 
     }
 
-    private void waitForVote() {
-
-//--------------------------
-
-        while (!isFinishedVote()) {
-            try {
-                System.out.println("PART: waiting...");
-                synchronized (this) {
-                    this.wait();
-                }
-                // wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
-            }
-        }
-
-//-----------------------------
-    }
 
     private void calculateVotes() {
 
@@ -243,16 +263,17 @@ public class Participant {
         System.out.println("PART: Sending outcome...");
         writer.println((new OutcomeToken(jointVote, tookPart)).createMessage());
         writer.flush( );
+    }
 
-//        System.out.println("PART: closing...");
-//        try {
-//            reader.close();
-//            writer.close();
-//            socket.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
+    public void close(){
+        System.out.println("PART: closing...");
+        try {
+            reader.close();
+            writer.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
