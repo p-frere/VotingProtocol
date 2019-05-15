@@ -32,7 +32,7 @@ class Tokenizer {
             case "DETAILS":
                 return new DetailsToken(Arrays.copyOfRange(words, 1, words.length));
             case "RESTART":
-                return new RestartToken();
+                return new RestartToken(Arrays.copyOfRange(words, 1, words.length));
             default:
                 System.out.println("TOK: corrupt token received");
                 return null;
@@ -45,7 +45,7 @@ abstract class Token {
     TokenType tokenType;
     abstract String createMessage();
 }
-
+//---------Join Token-------------------------
 class JoinToken extends Token {
     int pport;
 
@@ -75,14 +75,32 @@ class JoinToken extends Token {
 
 
 class RestartToken extends Token {
-    RestartToken() {
+    private String[] options;
+
+    RestartToken(String[] options) {
         tokenType = TokenType.RESTART;
+        this.options = options;
     }
+
+    public String[] getOptions() {
+        return options;
+    }
+
+    public String getOptionsAsString(){
+        StringBuilder sb = new StringBuilder();
+        for (String part : options){
+            sb.append(part);
+            sb.append(" ");
+        }
+        return sb.toString();
+    }
+
     public String createMessage(){
-        return  (tokenType.toString());
+        return  (tokenType.toString() + " "  + getOptionsAsString());
     }
 }
 
+//----------Outcome token
 class OutcomeToken extends Token {
     private String[] parts;
     private String outcome;
@@ -231,7 +249,6 @@ class VoteToken extends Token {
             sb.append(vote[1]);
             sb.append(" ");
         }
-        //sb.substring(0, sb.length()-2);
         return sb.toString();
     }
 

@@ -108,7 +108,7 @@ public class Participant {
         initSocket();
         initCoordComm();
         votesFinishedCountdown.await();
-        System.out.println("PART VOTES FINISHED");
+        //System.out.println("PART VOTES FINISHED");
         calculateVotes();
         reset();
         close();
@@ -120,16 +120,27 @@ public class Participant {
         try {
             while ((temp = reader.readLine()) != null) {
                 System.out.println("PART: read a reset");
+                Token token = new Tokenizer().getToken(temp);
+                if (!(token instanceof RestartToken)) {
+                    System.out.println("ST: token not a restart token");
+                    throw new IOException();
+                }
+
                 votesFinishedCountdown = new CountDownLatch(1);
                 allQueues = Collections.synchronizedList(new ArrayList<BlockingQueue<VoteToken>>());
                 setFinishedVote(false, "");
-                setInitialVote(new VoteToken(String.valueOf(pport) + " " + voteOptions[new Random().nextInt(voteOptions.length)]).getVotesAsString());
+                String[] newVoteoptions = ((RestartToken) token).getOptions();
+                if (newVoteoptions.length == 1){
+                    setInitialVote(new VoteToken(String.valueOf(pport) + " " + newVoteoptions[0]).getVotesAsString());
+                } else {
+                    setInitialVote(new VoteToken(String.valueOf(pport) + " " + (newVoteoptions[new Random().nextInt(newVoteoptions.length - 1)])).getVotesAsString());
+                }
                 System.out.println("PART: Voting for " + getInitialVote());
                 //roundCountdown = new CountDownLatch(getActiveParts());
 
-                System.out.println("PART: ----------------->" + resetCountdown.getCount());
+                //System.out.println("PART: ----------------->" + resetCountdown.getCount());
                 resetCountdown.countDown();
-                System.out.println("PART: ----------------->" + resetCountdown.getCount());
+                //System.out.println("PART: ----------------->" + resetCountdown.getCount());
                 votesFinishedCountdown.await();
                 calculateVotes();
                 reset();
@@ -185,7 +196,7 @@ public class Participant {
         writer.flush();
 
         //waits for the return of details
-        System.out.println("PART: Waiting for reads..");
+        //System.out.println("PART: Waiting for reads..");
         Tokenizer tokenizer = new Tokenizer();
         Token token = null;
         token = tokenizer.getToken(reader.readLine());
@@ -246,7 +257,7 @@ public class Participant {
         String jointVote = null;
         int max = 0;
         for (String vote : voteCount.keySet()){
-            System.out.println("_________ vote" + vote + " coutn " + voteCount.get(vote));
+            //System.out.println("_________ vote" + vote + " coutn " + voteCount.get(vote));
             if (voteCount.get(vote) > max){
                 max = voteCount.get(vote);
                 jointVote = vote;
@@ -260,7 +271,7 @@ public class Participant {
         System.out.println("PART: outcome = " + jointVote);
 
         //returns outcome to coordinator
-        System.out.println("PART: Sending outcome...");
+        //System.out.println("PART: Sending outcome...");
         writer.println((new OutcomeToken(jointVote, tookPart)).createMessage());
         writer.flush( );
     }

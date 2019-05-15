@@ -40,6 +40,16 @@ public class Coordinator
         this.restart = restart;
     }
 
+
+    public synchronized int getParts() {
+        return parts;
+    }
+
+    public synchronized void setParts(int parts) {
+        this.parts = parts;
+    }
+
+
     //A Thread manages I/O with each participant
     private class ServerThread extends Thread {
         private Socket partSocket;
@@ -100,9 +110,11 @@ public class Coordinator
             //-----------Reset----------
 
                 do {
+                    //wait to see if a reset is required
                     resetCountdown = new CountDownLatch(1);
-                    tell(id, "RESTART");
-                    System.out.println("ST: waiting again now for new outcome after restart...");
+                    //if it is send a restart token with updated voting options
+                    tell(id, new RestartToken(votingOptions).createMessage());
+                    //System.out.println("ST: waiting again now for new outcome after restart...");
 
                     // wait until votes received from participants exits.
                     temp = reader.readLine();
@@ -122,7 +134,7 @@ public class Coordinator
 
             }
             catch (IOException | InterruptedException e) {
-                System.err.println("ST: Caught I/O Exception.");
+                System.err.println("ST: Caught I/O Exception. Participant connection removed");
                 //e.printStackTrace();
                 removeParticipant(id);
             }
@@ -131,9 +143,10 @@ public class Coordinator
         //remove a participant for the list
         private void removeParticipant(String id){
             partWriters.remove(id);
-            parts--; // TODO ----------------------------- THIS NEEDS TO BE ATOMIC
+            int temp = getParts();
+            setParts(temp-1);
             outcomeCountdown.countDown();
-            System.out.println(id + " removed");
+            //System.out.println(id + " removed");
 
         }
 
@@ -149,17 +162,17 @@ public class Coordinator
                     count++;
                 }
             }
-            return partsExludingMe; //new String[]{"1","2"};
+            return partsExludingMe;
         }
     }
 
     //wait for all parties to join
     private synchronized void waitForJoins(){
-        if (partWriters.size() != parts) {
+        if (partWriters.size() != getParts()) {
 
-            while (partWriters.size() != parts) {
+            while (partWriters.size() != getParts()) {
                 try {
-                    System.out.println("waiting...");
+                    //System.out.println("waiting...");
                     wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -169,30 +182,32 @@ public class Coordinator
         } else {
             notifyAll();
         }
-
-        System.out.println("stopped waiting");
-
+        //System.out.println("stopped waiting");
     }
 
     private Coordinator(String[] args) throws IOException, InterruptedException {
         init(args);
         startListening();
 
-        System.out.println("Waiting on outcome latch");
+        //System.out.println("Waiting on outcome latch");
         outcomeCountdown.await();
-        System.out.println("Got all outcomes");
+        System.out.println("COORD: Got all outcomes");
 
         results();
         close();
     }
 
     private void close(){
-        //TODO
         Runtime.getRuntime().halt(0);
     }
 
     //calculates the results
     private void results() throws InterruptedException {
+        if (outcomesRecived.isEmpty()){
+            System.out.println("COORD: No outcomes recived");
+            System.out.println("-Finished-");
+            close();
+        }
 
         OutcomeToken out = outcomesRecived.poll();
         String result = out.getOutcome();
@@ -200,8 +215,8 @@ public class Coordinator
         while (!outcomesRecived.isEmpty()) {
             out = outcomesRecived.poll();
             if (!out.getOutcome().equals(result)){
-                //some error
-                System.out.println("ERROR results do not match");
+                //check to see if all outcomes match
+                System.out.println("COORD: ERROR results do not match");
             }
         }
 
@@ -209,20 +224,22 @@ public class Coordinator
 
         if(result.equals("null")) {
             //restart is needed
-            System.out.println("Restart needed");
+            System.out.println("COORD: Restart needed");
+            //reduce voting options
+            votingOptions = Arrays.copyOfRange(votingOptions, 0, votingOptions.length-1);
             //reset latches and trigger reset latch
-            outcomeCountdown = new CountDownLatch(parts);
+            outcomeCountdown = new CountDownLatch(getParts());
             outcomesRecived.clear();
             resetCountdown.countDown();
 
-            System.out.println("Waiting on outcome latch");
+            //System.out.println("Waiting on outcome latch");
             outcomeCountdown.await();
-            System.out.println("Got all outcomes");
+            System.out.println("COORD: Recived all outcomes");
 
             results();
 
         } else {
-            System.out.println("Finished");
+            System.out.println("-Finished-");
         }
     }
 
@@ -240,18 +257,18 @@ public class Coordinator
     private void startListening() throws IOException{
         int joinedCnt = 0;
         ServerSocket listener = new ServerSocket(port);
-        System.out.println("Listning...");
+        System.out.println("COORD: Listning...");
 
         do  {
             Socket client = listener.accept();
             client.setSoLinger(true, 0);
             new ServerThread(client).start();
             joinedCnt++;
-            System.out.println("Participant joined " + joinedCnt + "/" + parts);
+            System.out.println("COORD: Participant joined " + joinedCnt + "/" + parts);
         } while (joinedCnt < parts);
 
         listener.close();
-        System.out.println("Stopped listning.");
+        //System.out.println("Stopped listning.");
     }
 
     private void init(String[] args) {

@@ -44,16 +44,14 @@ class PartCoord implements Runnable {
 
     @Override
     public void run() {
-
         beginVote();
-
         do {
             try {
 
                 System.out.println("COORD: wait for reset signal");
-                System.out.println("COORD: " + resetCountdown.getCount());
-                if (!resetCountdown.await(10L, TimeUnit.SECONDS)) {
-                    System.out.println("COORD: Timed out");
+                //System.out.println("COORD: " + resetCountdown.getCount());
+                if (!resetCountdown.await(20L, TimeUnit.SECONDS)) {
+                    //System.out.println("COORD: Timed out");
                     Runtime.getRuntime().halt(0);
                 }
 
@@ -91,46 +89,29 @@ class PartCoord implements Runnable {
         //spins until correct number of participants joined
         while(noActiveParts != allQueues.size()){
             //spin
-            System.out.println("CORD: Expected length not met");
+            //System.out.println("CORD: Expected length not met");
         }
 
         while(!finished) {
-            //try {
-                System.out.println("CORD: All parts present, waiting on round...");
-                //roundCountdown.await();
+            for (int q = 0; q < allQueues.size(); q++){
 
-                for (int q = 0; q < allQueues.size(); q++){
-                //for (BlockingQueue<VoteToken> q : allQueues) { //TODO better than for
-//                        if(!q.isEmpty()) {
-//                            VoteToken vt = q.poll();
-//                            addVote(vt.getVotes()[0][0], vt.getVotesAsString());
-//                        } else {
-//                            System.out.println("CORD: null skipped");
-//                        }
-
-                    if(!deadList.contains(q)) { //if a is not marked as dead
-                        VoteToken vt = null;
-                        try {
-                            vt = allQueues.get(q).poll(3L, TimeUnit.SECONDS);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        if (vt != null)
-                                addVote(vt.getVotes()[0][0], vt.getVotesAsString());
-                    } else {
-                        System.out.println("CORD: null skipped");
+                if(!deadList.contains(q)) { //if a is not marked as dead
+                    VoteToken vt = null;
+                    try {
+                        vt = allQueues.get(q).poll(3L, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
+                    if (vt != null)
+                            addVote(vt.getVotes()[0][0], vt.getVotesAsString());
+                } else {
+                    //System.out.println("CORD: null skipped");
                 }
+            }
 
-
-//            } catch (InterruptedException e) {
-//                System.out.println("COORD: interupted");
-//                e.printStackTrace();
-//            }
-
-            System.out.println("CORD: round finished");
+            //System.out.println("CORD: round finished");
             if (compareRounds()) {
-                System.out.println("CORD: duplicate rounds, waking participant");
+                System.out.println("CORD: finished, waking participant");
                 if (failureCond == 2){
                     System.out.println("CORD: Ended for error code 2");
                     Runtime.getRuntime().halt(0);
@@ -138,17 +119,17 @@ class PartCoord implements Runnable {
                 }
                 participant.setFinishedVote(true, currentVote);
                 votesFinishedCountdown.countDown();
-                System.out.println("COORD: votes finished countdown = " + votesFinishedCountdown.getCount());
+                //System.out.println("COORD: votes finished countdown = " + votesFinishedCountdown.getCount());
                 finished = true;
 
             } else {
 
                 currentVote = combineVotes();
                 currentRound++;
-                System.out.println("CORD: current vote = " + currentVote);
-                System.out.println("CORD: current round = " + currentRound);
+                //System.out.println("CORD: current vote = " + currentVote);
+                //System.out.println("CORD: current round = " + currentRound);
                 if (rounds.size() <= currentRound) {
-                    System.out.println("CORD: added new round = " + currentRound);
+                    //System.out.println("CORD: added new round = " + currentRound);
                     rounds.add(currentRound, new HashMap<>());
                 }
                 broadcastVote();
@@ -158,7 +139,7 @@ class PartCoord implements Runnable {
 
     //connects writers to all other participants
     public void startStreams(){
-        System.out.println("CORD: Populating writers");
+        //System.out.println("CORD: Populating writers");
         writers = new HashMap<>();
         try {
             for(int port: initPartSockets){
@@ -178,11 +159,12 @@ class PartCoord implements Runnable {
         rounds.add(0,new HashMap<>());
         rounds.get(0).put(String.valueOf(pport), currentVote);
         rounds.add(1,new HashMap<>());
+        rounds.get(1).put(String.valueOf(pport), currentVote);
         currentRound = 1;
     }
 
     public synchronized void addVote(String id, String votes){
-        System.out.println("CORD: adding vote ---- " + votes);
+        System.out.println("CORD: adding vote -- " + votes + " --");
         rounds.get(currentRound).put(id, votes);
     }
 
@@ -191,7 +173,7 @@ class PartCoord implements Runnable {
         Map<String, String> votes = new HashMap<>();
         //for the data in the current round
         for(String partVotes : rounds.get(currentRound).keySet()){
-            System.out.println("partvote: "+partVotes);
+            //System.out.println("partvote: "+partVotes);
             //make a token with each string stored
             VoteToken tempTok = new VoteToken(rounds.get(currentRound).get(partVotes));
             String[][] pairing = tempTok.getVotes();
@@ -199,12 +181,12 @@ class PartCoord implements Runnable {
             //add each id and vote option into the hashmap
             for (String[] row : pairing){
                 votes.put(row[0],row[1]);
-                System.out.println("adding " + Arrays.toString(row));
+                //System.out.println("adding " + Arrays.toString(row));
             }
         }
 
-        System.out.println(currentVote);
-        System.out.println(rounds.get(currentRound-1).get(String.valueOf(pport)));
+        //System.out.println(currentVote);
+        //System.out.println(rounds.get(currentRound-1).get(String.valueOf(pport)));
         VoteToken tempTok = new VoteToken(currentVote);
         String[][] pairing = tempTok.getVotes();
 
@@ -213,7 +195,6 @@ class PartCoord implements Runnable {
             votes.put(row[0],row[1]);
             //System.out.println("adding " + Arrays.toString(row));
         }
-
 
         //remove own vote if there
         votes.remove(String.valueOf(pport));
@@ -251,10 +232,30 @@ class PartCoord implements Runnable {
 
         if (currentRound == 0)
             return false;
-        else if (rounds.get(currentRound).equals(rounds.get(currentRound-1))){
-            return true;
-        } else {
-            return false;
+//        else if (rounds.get(currentRound).equals(rounds.get(currentRound-1))){
+//            return true;
+//        } else {
+//            return false;
+//        }
+        else {
+            Map<String,String > cur = rounds.get(currentRound);
+            Map<String,String> prev = rounds.get(currentRound-1);
+            Map<String, String > orderCur = new HashMap<>();
+            Map<String, String > orderPrev = new HashMap<>();
+
+            for (String partId : cur.keySet()){
+                orderCur.put(partId, cur.get(partId));
+            }
+
+            for (String partId : prev.keySet()){
+                orderPrev.put(partId, prev.get(partId));
+            }
+
+            if (orderCur.equals(orderPrev)){
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

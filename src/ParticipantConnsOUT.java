@@ -18,13 +18,13 @@ class ParticipantConnsOUT extends Thread {
 
     public ParticipantConnsOUT(Socket partSocket, BlockingQueue<VoteToken> votesRecived, Participant participant, int index){
         this.partSocket = partSocket;
-        System.out.println("CONS: new thread created for voting");
+        //System.out.println("CONS: new thread created for voting");
         this.votesRecived = votesRecived;
         this.participant = participant;
         this.deadList = participant.getDeadList();
         this.allQueues = participant.getAllQueues();
         this.index = index;
-        System.out.println("CONNS: index is " + index);
+        //System.out.println("CONNS: index is " + index);
     }
 
 
@@ -39,7 +39,7 @@ class ParticipantConnsOUT extends Thread {
 
             Token token = null;
             Tokenizer tokenizer = new Tokenizer();
-            System.out.println("CONS: reading from connected parts...");
+            //System.out.println("CONS: reading from connected parts...");
 
             String temp = null;
 
@@ -47,7 +47,7 @@ class ParticipantConnsOUT extends Thread {
             while (true) {
                 temp = reader.readLine();
                 if (temp == null){
-                    System.out.println("CONNS: Null read");
+                    //System.out.println("CONNS: Null read");
                     throw new IOException();
                 } else {
                     token = tokenizer.getToken(temp);
@@ -70,7 +70,7 @@ class ParticipantConnsOUT extends Thread {
             deadList.add(index);
             int ap = participant.getActiveParts();
             participant.setActiveParts(ap);
-            System.out.println("CONNS: DIED");
+            System.out.println("CONNS: A participant has died");
 
             //votesRecived.add(new VoteToken(null)); //ADD this?
 
